@@ -1,6 +1,6 @@
-require 'minitest/autorun'
+require 'test/unit'
 
-class NetworkTest < MiniTest::Test
+class NetworkTest < Test::Unit::TestCase
   def setup
     @network = Network.new(26, 12, 6)
     @fat_network = Network.new(200, 50, 50, 3)
