@@ -1,23 +1,25 @@
 require 'test/unit'
 require 'tempfile'
+require File.expand_path(File.join(File.dirname(__FILE__), '../lib/language.rb'))
 
 class LanguageTest < Test::Unit::TestCase
   def setup
     language_data = <<-EOL
-    abcdefghijklmnopqrstuvwzyz
-    ABCDEFGHIJKLMNOPQRSTUVWZYZ
+    abcdefghijklmnopqrstuvwxyz
+    ABCDEFGHIJKLMNOPQRSTUVWXYZ
     !~.@#$%^&*()_+'?[]“”‘’—<>»«›‹–„/
-    ïëéyüòèöÄÖßÜøæåÅØóąłżŻśęńŚćźŁ
+    ïëéüòèöÄÖßÜøæåÅØóąłżŻśęńŚćźŁ
     EOL
     language_file = Tempfile.new('langfile')
     language_file.write(language_data)
+    language_file.close
     
-    @language = Language.new(language_file, 'English')
+    @language = Language.new(language_file.path, 'English')
   end
   
   def test_alpha_frequencies
     ('a'..'z').to_a.map do |alpha|
-      assert_equal 2, @language.frequency_for(alpha)
+      assert_equal 2, @language.frequency_for(alpha), alpha
     end
   end
   
