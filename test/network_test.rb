@@ -1,4 +1,5 @@
 require 'test/unit'
+require File.expand_path(File.join(File.dirname(__FILE__), '../lib/network.rb'))
 
 class NetworkTest < Test::Unit::TestCase
   def setup
