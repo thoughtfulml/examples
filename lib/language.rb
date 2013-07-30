@@ -1,4 +1,6 @@
 class Language
+  PUNCTUATION = %w[! ~ . @ # $ % ^ & * ( ) _ + ' ? [ ] “ ” ‘ ’ — < > » « › ‹ – „ /]
+  SPACES = [" ", "\u00A0"]
   def initialize(text_file, name)
     @name = name
     @text_file = text_file
@@ -16,7 +18,11 @@ class Language
   def calculate_frequencies(text_file)
     hash = Hash.new(0)
     File.open(text_file, 'r').each_char do |char|
-      hash[char.downcase] += 1
+      if SPACES.include?(char) || PUNCTUATION.include?(char)
+        # Do not capture 
+      else
+        hash[char.downcase] += 1
+      end
     end
     hash
   end
