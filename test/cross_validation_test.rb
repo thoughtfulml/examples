@@ -1,11 +1,12 @@
-require 'test/unit'
-require File.expand_path(File.join(File.dirname(__FILE__), '../lib/network.rb'))
-require File.expand_path(File.join(File.dirname(__FILE__), '../lib/language.rb'))
+require 'minitest/autorun'
+require File.expand_path(File.join(File.dirname(__FILE__), '../../lib/network.rb'))
+require File.expand_path(File.join(File.dirname(__FILE__), '../../lib/language.rb'))
 
+puts "Bootstrapping Neural Network"
 @languages = []
 @cross_validation_languages = []
 
-Dir[File.expand_path(File.join(File.dirname(__FILE__), './data/*.txt'))].each do |txt|
+Dir[File.expand_path(File.join(File.dirname(__FILE__), '../data/*.txt'))].each do |txt|
   if txt =~ /_1\.txt/
     @cross_validation_languages << Language.new(txt, File.basename(txt, '.txt').split("_").first)
   else
@@ -18,7 +19,7 @@ MATTHEW_VERSES.train!
 ACTS_VERSES = Network.new(@cross_validation_languages)
 ACTS_VERSES.train!
 
-class CrossValidationTest < Test::Unit::TestCase
+class CrossValidationTest < MiniTest::Unit::TestCase
   def compare(network, text_file)
     misses = 0
     hits = 0
