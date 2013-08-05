@@ -1,12 +1,12 @@
 require 'minitest/autorun'
-require File.expand_path(File.join(File.dirname(__FILE__), '../../lib/network.rb'))
-require File.expand_path(File.join(File.dirname(__FILE__), '../../lib/language.rb'))
+require File.expand_path(File.join(File.dirname(__FILE__), '../lib/network.rb'))
+require File.expand_path(File.join(File.dirname(__FILE__), '../lib/language.rb'))
 
 puts "Bootstrapping Neural Network"
 @languages = []
 @cross_validation_languages = []
 
-Dir[File.expand_path(File.join(File.dirname(__FILE__), '../data/*.txt'))].each do |txt|
+Dir[File.expand_path(File.join(File.dirname(__FILE__), './data/*.txt'))].each do |txt|
   if txt =~ /_1\.txt/
     @cross_validation_languages << Language.new(txt, File.basename(txt, '.txt').split("_").first)
   else
@@ -43,12 +43,7 @@ describe Network do
 
   %w[English Finnish German Norwegian Polish Swedish].each do |lang|
     it "Trains and cross-validates with an error of 5% for #{lang}" do
-      language_test
+      language_test(lang)
     end
   end
-
-end
-
-class CrossValidationTest < MiniTest::Unit::TestCase
-
 end
