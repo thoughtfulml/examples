@@ -26,7 +26,7 @@ describe Network do
 
     file = File.read(text_file)
     file.split(/[\.!\?]/).each do |sentence|
-      if network.run(sentence).name.split("_").first == File.basename(text_file, '.txt').split("_").first
+      if network.run(sentence).name == File.basename(text_file, '.txt').split("_").first
         hits += 1
       else
         misses += 1
