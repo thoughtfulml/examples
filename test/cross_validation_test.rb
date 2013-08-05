@@ -19,7 +19,7 @@ MATTHEW_VERSES.train!
 ACTS_VERSES = Network.new(@cross_validation_languages)
 ACTS_VERSES.train!
 
-class CrossValidationTest < MiniTest::Unit::TestCase
+describe Network do
   def compare(network, text_file)
     misses = 0
     hits = 0
@@ -32,6 +32,7 @@ class CrossValidationTest < MiniTest::Unit::TestCase
         misses += 1
       end
     end
+
     assert misses < (0.05 * (misses + hits)), "#{text_file} has failed with a miss rate of #{misses.to_f / (misses + hits)}"
   end
 
@@ -41,8 +42,13 @@ class CrossValidationTest < MiniTest::Unit::TestCase
   end
 
   %w[English Finnish German Norwegian Polish Swedish].each do |lang|
-    define_method "test_#{lang.downcase}" do
-      language_test(lang)
+    it "Trains and cross-validates with an error of 5% for #{lang}" do
+      language_test
     end
   end
+
+end
+
+class CrossValidationTest < MiniTest::Unit::TestCase
+
 end
