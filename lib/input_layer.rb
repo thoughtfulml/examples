@@ -1,0 +1,3 @@
+class InputLayer < Layer
+  
+end
