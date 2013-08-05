@@ -13,10 +13,10 @@ Dir[File.expand_path(File.join(File.dirname(__FILE__), './data/*.txt'))].each do
   end
 end
 
-LANGUAGE_NETWORK = Network.new(@languages)
-LANGUAGE_NETWORK.train!
-CROSS_VAL_NETWORK = Network.new(@cross_validation_languages)
-CROSS_VAL_NETWORK.train!
+MATTHEW_VERSES = Network.new(@languages)
+MATTHEW_VERSES.train!
+ACTS_VERSES = Network.new(@cross_validation_languages)
+ACTS_VERSES.train!
 
 class CrossValidationTest < Test::Unit::TestCase
   def compare(network, text_file)
@@ -35,11 +35,11 @@ class CrossValidationTest < Test::Unit::TestCase
   end
 
   def language_test(language)
-    compare(LANGUAGE_NETWORK, "./test/data/#{language}_1.txt")
-    compare(CROSS_VAL_NETWORK, "./test/data/#{language}_0.txt")
+    compare(MATTHEW_VERSES, "./test/data/#{language}_1.txt")
+    compare(ACTS_VERSES, "./test/data/#{language}_0.txt")
   end
 
-  %w[Dutch English Finnish German Norwegian Polish Swedish].each do |lang|
+  %w[English Finnish German Norwegian Polish Swedish].each do |lang|
     define_method "test_#{lang.downcase}" do
       language_test(lang)
     end

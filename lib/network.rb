@@ -1,6 +1,5 @@
 require 'ruby-fann'
 class Network
-  attr_reader :fann, :trainer
   def initialize(languages)
     @languages = languages
     @inputs = @languages.map {|l| l.characters.to_a }.flatten.uniq.sort
@@ -11,13 +10,13 @@ class Network
   def train!
     build_trainer!
     build_standard_fann!
-    @fann.train_on_data(@trainer, 1000, 10, 0.01)
+    @fann.train_on_data(@trainer, 1000, 10, 0.005)
   end
 
-  def code(hash)
-    return [] if hash.nil?
+  def code(vector)
+    return [] if vector.nil?
     @inputs.map do |i|
-      hash.fetch(i, 0.0)
+      vector.fetch(i, 0.0)
     end
   end
 
@@ -66,7 +65,7 @@ class Network
 
     @fann = RubyFann::Standard.new(
       :num_inputs => @inputs.length,
-      :hidden_neurons => [ @inputs.length / 2 ],
+      :hidden_neurons => [ hidden_neurons ],
       :num_outputs => @languages.length
     )
 

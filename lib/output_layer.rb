@@ -1,3 +1,0 @@
-class OutputLayer < Layer
-  
-end
