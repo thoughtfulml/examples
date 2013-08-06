@@ -10,7 +10,7 @@ Dir[File.expand_path(File.join(File.dirname(__FILE__), './data/*.txt'))].each do
   if txt =~ /_1\.txt/
     @cross_validation_languages << Language.new(txt, File.basename(txt, '.txt').split("_").first)
   else
-    @languages << Language.new(txt, File.basename(txt, '.txt'))
+    @languages << Language.new(txt, File.basename(txt, '.txt').split("_").first)
   end
 end
 
