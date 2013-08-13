@@ -1,18 +1,24 @@
 Neural Nets
 ============
 
+run the tests by doing a `bundle exec rake`
 
-Fundamentally neural nets are a simple idea:
+This repository aims to classify sentences by character frequency into languages based on passages in the bible.
 
-Take information that we 'believe' to map to a set of outputs. 
+The training set is all chapters of Matthew and Acts in Norwegian, English, Polish, Swedish, German, and Finnish.
 
-There are some major pieces of a neural net and they are:
+There are two classes and a module in this repo and are:
 
-* Network: These are defined by the syntax I-H-H-O where I is the input layer, H is a hidden layer, and O is the output layer. So if we have 26 inputs 6 outputs and 12 hidden neurons we would notate that as 26-12-6.
-* Neuron: Neurons are dumb actors that take multiple inputs and output based on an activation function.
-* Algorithm: There are many algorithms for training a network we will use the RProp algorithm since it is fast and usable.
-* Input Data: In this case it will be a document
-* Output data: Output will be a language classification
+* Language - This takes a language training file, parses it and calculates an array of character frequencies built up using a hash.
+* Tokenizer - This is where the tokenization is accomplished for each text blob
+* Network - This interfaces with ruby-fann to train a neural network
 
+To build a network built up on Language data one would do as follows
 
+```ruby
+english = Language.new('English.txt', 'English')
+network_of_english = Network.new([english])
+network_of_english.train!
 
+network_of_english.run('The quick brown fox') #=> english
+```
