@@ -1,0 +1,20 @@
+<h1>Status</h1>
+
+<% if !@negative || !@positive %>
+  <p> Still processing </p>
+<% else %>
+  <p> Fully bootstrapped </p>
+<% end %>
+
+<form action='/sentiment' method='POST'>
+  <textarea name='text_blob'></textarea>
+  <input type='submit'>
+</form>
+
+<form action='/random_negative' method='GET'>
+  <input type='submit' value='Random Negative Review'>
+</form>
+
+<form action='/random_positive' method='GET'>
+  <input type='submit' value='Random Positive Review'>
+</form>
