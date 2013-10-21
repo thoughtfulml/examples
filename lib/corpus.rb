@@ -30,23 +30,23 @@ class Corpus
   end
 
   def self.rows
-    REDIS.get("sentiment_lines").to_i - 1
+    REDIS.get("lines").to_i - 1
   end
 
   def self.y_for(row_num)
-    REDIS.get("sentiment_line_y_#{row_num}").to_i
+    REDIS.get("line_y_#{row_num}").to_i
   end
 
   def self.hash_for(row_num)
     xes = Hash.new(0)
-    REDIS.smembers("sentiment_line_#{row_num}").map(&:to_i).each do |col_num|
+    REDIS.smembers("line_#{row_num}").map(&:to_i).each do |col_num|
       xes[col_num] = 1
     end
     xes
   end
 
   def self.train_svm!(c = 2 ** 13, mod = 1)
-    columns = REDIS.get("sentiment_analyzer:last_index").to_i - 1
+    columns = REDIS.get("last_index").to_i - 1
 
     y_vec = []
     x_mat = []
@@ -74,25 +74,25 @@ class Corpus
   end
 
   def self.parse_line(line, sentiment)
-    index = REDIS.get("sentiment_lines") || 0
+    index = REDIS.get("lines") || 0
 
     indexes = line.split(/\s+/).map { |word| incr(word) }
 
-    REDIS.set("sentiment_line_y_#{index}", sentiment)
-    REDIS.sadd("sentiment_line_#{index}", indexes)
+    REDIS.set("line_y_#{index}", sentiment)
+    REDIS.sadd("line_#{index}", indexes)
 
-    REDIS.incr("sentiment_lines")
+    REDIS.incr("lines")
   end
 
   def self.incr(word)
-    index = REDIS.get("sentiment_analyzer:last_index") || 0
-    if REDIS.setnx("sentiment_analyzer:#{word}", index)
-      REDIS.incr("sentiment_analyzer:last_index")
+    index = REDIS.get("last_index") || 0
+    if REDIS.setnx("w:#{word}", index)
+      REDIS.incr("last_index")
     end
     index
   end
 
   def self.fetch(word)
-    REDIS.get("sentiment_analyzer:#{word}")
+    REDIS.get("w:#{word}")
   end
 end
