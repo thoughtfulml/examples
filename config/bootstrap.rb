@@ -1,5 +1,11 @@
 require 'bundler'
 Bundler.require
+if ENV['REDISCLOUD_URL']
+  REDIS_CLOUD = URI.parse(ENV["REDISCLOUD_URL"])
+  REDIS = Redis.new(:host => uri.host, :port => uri.port, :password => uri.password)
+else
+  REDIS = Redis.new
+end
 
 require_relative '../lib/corpus'
 
