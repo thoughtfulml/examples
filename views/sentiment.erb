@@ -1,7 +1,7 @@
-<p><%= @sentence %></p>
-<pre>
-  <%= @description %>
-</pre>
+<h1>"<%= @sentence %>"</h1>
 
-<h1>Positive or Negative</h1>
-<%= @prediction %>
+<% if @prediction < 0 %>
+  <h2 class='alert alert-danger'>Negative</h2>
+<% else %>
+  <h2 class='alert alert-info'>Positive</h2>
+<% end %>
