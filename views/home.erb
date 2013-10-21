@@ -1,9 +1,7 @@
-<h1>Status</h1>
-
 <% if !@negative || !@positive %>
-  <p> Still processing </p>
+  <p class='alert alert-warning'> Still training and building SVM </p>
 <% else %>
-  <p> Fully bootstrapped </p>
+  <p class='alert alert-info'> Model done processing </p>
 <% end %>
 
 <form action='/sentiment' method='POST'>

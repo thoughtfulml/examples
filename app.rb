@@ -3,7 +3,7 @@ class SentimentAnalyzer < Sinatra::Base
   POSITIVE = File.open("./config/rt-polaritydata/rt-polarity.pos", "rb").to_a
   NEGATIVE = File.open("./config/rt-polaritydata/rt-polarity.neg", "rb").to_a
 
-  helper do
+  helpers do
     def description(sentence)
       YAML::dump(Corpus.sparse_vector(@sentence).keys)
     end
