@@ -1,6 +1,5 @@
 require 'yaml'
 class SentimentAnalyzer < Sinatra::Base
-  REDIS = Redis.new
   POSITIVE = File.open("./config/rt-polaritydata/rt-polarity.pos", "rb").to_a
   NEGATIVE = File.open("./config/rt-polaritydata/rt-polarity.neg", "rb").to_a
 
