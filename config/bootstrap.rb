@@ -10,8 +10,10 @@ end
 
 require_relative '../lib/corpus'
 
-REDIS.flushall
+Thread.new do
+  REDIS.flushall
 
-Corpus.parse_file("./config/rt-polaritydata/rt-polarity.pos", 1, 5331)
-Corpus.parse_file("./config/rt-polaritydata/rt-polarity.neg", -1, 5331)
-SentimentModel = Corpus.train_svm!
+  Corpus.parse_file("./config/rt-polaritydata/rt-polarity.pos", 1, 5331)
+  Corpus.parse_file("./config/rt-polaritydata/rt-polarity.neg", -1, 5331)
+  SentimentModel = Corpus.train_svm!
+end
