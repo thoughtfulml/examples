@@ -1,16 +1,17 @@
 require 'ruby-fann'
 class Network
-  def initialize(languages)
+  def initialize(languages, error = 0.005)
     @languages = languages
     @inputs = @languages.map {|l| l.characters.to_a }.flatten.uniq.sort
     @fann = :not_ran
     @trainer = :not_trained
+    @error = error
   end
 
   def train!
     build_trainer!
     build_standard_fann!
-    @fann.train_on_data(@trainer, 1000, 10, 0.005)
+    @fann.train_on_data(@trainer, 1000, 10, @error)
   end
 
   def code(vector)

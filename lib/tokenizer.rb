@@ -1,3 +1,4 @@
+#encoding:utf-8
 module Tokenizer
   extend self
   PUNCTUATION = %w[~ @ # $ % ^ & * ( ) _ + ' [ ] “ ” ‘ ’ — < > » « › ‹ – „ /]

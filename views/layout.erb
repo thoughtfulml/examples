@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="../../assets/ico/favicon.png">
+
+    <title>Language Classifier!</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/css/bootstrap.css" rel="stylesheet">
+
+    <!-- Bootstrap theme -->
+    <link href="/css/bootstrap-theme.min.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Language Classifier</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/">Home</a></li>
+            <li><a href='/swedish_chef'>Swedish Chef Quotes</a></li>
+            <% %w[English German Finnish Swedish Polish Norwegian].sort.each do |lang| %>
+              <li><a href='/<%= lang.downcase %>'><%= lang %></a></li>
+            <% end %>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+    <div class="container theme-showcase">
+      <div class='jumbotron'>
+        <%= yield %>
+      </div>
+    </div>
+    <script src='/js/jquery.min.js'></script>
+  </body>
+</html>

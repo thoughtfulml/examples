@@ -1,0 +1,28 @@
+<form action='/classify' method='POST'>
+  <textarea name='text_blob' id='text_blob'></textarea>
+  <input type='submit'>
+  <p id='helper_text'></p>
+</form>
+<script type="text/javascript" charset="utf-8">
+  init = function () {
+    $('#text_blob').on('keyup', function(e) {
+      val = $(e.target).val();
+      if (val.length < 3) {
+        return false;
+      }
+      // console.log(e);
+      $.ajax({
+        url: '/classify',
+        type: 'POST',
+        data: {
+          'text_blob': val
+        },
+        success: function(data) {
+          $('#helper_text').text(data['language']);
+        }
+      })
+    })
+  }
+
+  window.onload = init;
+</script>
