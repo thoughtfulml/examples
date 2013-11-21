@@ -1,6 +1,14 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    ansi (1.4.3)
+    metaclass (0.0.1)
+    minitest (5.0.8)
+    minitest-doc_reporter (0.6.0)
+      ansi
+      minitest (~> 5.0)
+    mocha (0.14.0)
+      metaclass (~> 0.0.1)
     rack (1.5.2)
     rack-protection (1.5.0)
       rack
@@ -17,6 +25,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  minitest-doc_reporter
+  mocha
   rb-libsvm
   redis
   ruby-progressbar
