@@ -1,14 +1,19 @@
 class FaceFeatures
   include OpenCV
-  def self.extract(avatar)
-    avatar = File.expand_path("../../public/#{avatar}", __FILE__)
-    image = CvMat.load(avatar, CV_LOAD_IMAGE_GRAYSCALE)
-    rgb = CvMat.load(avatar, CV_LOAD_IMAGE_COLOR)
+
+  def self.features(filepath)
+    image = CvMat.load(filepath, CV_LOAD_IMAGE_GRAYSCALE)
 
     min_hessian = 500
-    param = CvSURFParams.new(min_hessian, true)
+    param = CvSURFParams.new(min_hessian)
 
-    kp, desc = image.extract_surf(param)
+    image.extract_surf(param)
+  end
+
+  def self.extract(avatar)
+    avatar = File.expand_path("../../public/#{avatar}", __FILE__)
+    rgb = CvMat.load(avatar, CV_LOAD_IMAGE_COLOR)
+    kp, desc = features(avatar)
 
     kp.each do |r|
       center = CvPoint.new(r.pt.x, r.pt.y)
