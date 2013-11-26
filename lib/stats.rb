@@ -1,32 +1,28 @@
+require 'matrix'
 module Stats
   extend self
 
   def nearest_neighbor(matrix1)
     descriptors = {}
 
-    (1..40).each do |s|
-      Dir["./data/att_faces/s#{s}/*.png"].each do |f|
-        _, desc = FaceFeatures.features(f)
-        descriptors[:"s#{s}#{File.basename(f, '.png')}"] = desc
-      end
+    Dir['./public/faces/avatar_*.jpg'].each do |f|
+      _, desc = FaceFeatures.features(f)
+      descriptors[File.basename(f)] = desc
     end
+    # (1..40).each do |s|
+    #   Dir["./public/att_faces/s#{s}/*.png"].each do |f|
+    #     _, desc = FaceFeatures.features(f)
+    #     descriptors[:"s#{s}_#{File.basename(f, '.png')}"] = desc
+    #   end
+    # end
 
-    min = nil
-    arg = :none
+    distances_from = {}
 
     descriptors.each do |k,v|
-      dist = distance_matrix(v, matrix1)
-      if min.nil? || dist < min
-        min = dist
-        arg = k
-      else
-        # pass
-      end
+      distances_from[k] = distance_matrix(v, matrix1)
     end
 
-    {
-      arg => min
-    }
+    distances_from
   end
 
   def distance_matrix(matrix1, matrix2)

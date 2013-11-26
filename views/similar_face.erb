@@ -9,3 +9,17 @@ Extracted
 
 features
 <img src='<%= @filepath.fetch(:face_features) %>'>
+
+<h2> Best Matches </h2>
+<ol>
+  <% @similar_faces.first(5).each do |face, distance| %>
+    <li><img src='faces/<%= face %>'/> <%= distance %></li>
+  <% end %>
+</ol>
+
+<h2> Worst Matches </h2>
+<ol>
+  <% @similar_faces.last(5).each do |face, distance| %>
+    <li><img src='faces/<%= face %>'/> <%= distance %></li>
+  <% end %>
+</ol>

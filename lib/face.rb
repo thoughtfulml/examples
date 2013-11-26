@@ -18,10 +18,8 @@ class Face
 
     region = detector.detect_objects(image).first
 
-    # detector.detect_objects(image).each do |region|
-      color = OpenCV::CvColor::Blue
-      image.rectangle! region.top_left, region.bottom_right, :color => color
-    # end
+    color = OpenCV::CvColor::Blue
+    image.rectangle! region.top_left, region.bottom_right, :color => color
 
     image.save_image(filepath)
 
