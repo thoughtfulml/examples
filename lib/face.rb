@@ -1,4 +1,5 @@
 require 'opencv'
+require_relative 'face_features'
 class Face
   def self.from_base64(base64)
     encoded_data = Base64.decode64(base64)
@@ -24,9 +25,12 @@ class Face
 
     image.save_image(filepath)
 
+    avatar = extract_avatar(filepath, region)
+
     {
-      :avatar => extract_avatar(filepath, region),
-      :face => "faces/" + File.basename(filepath)
+      :avatar => avatar,
+      :face => "faces/" + File.basename(filepath),
+      :face_features => FaceFeatures.extract(avatar)
     }
   end
 
