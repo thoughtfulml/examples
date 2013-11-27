@@ -9,12 +9,6 @@ module Stats
       _, desc = FaceFeatures.features(f)
       descriptors[File.basename(f)] = desc
     end
-    # (1..40).each do |s|
-    #   Dir["./public/att_faces/s#{s}/*.png"].each do |f|
-    #     _, desc = FaceFeatures.features(f)
-    #     descriptors[:"s#{s}_#{File.basename(f, '.png')}"] = desc
-    #   end
-    # end
 
     distances_from = {}
 
