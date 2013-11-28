@@ -4,25 +4,17 @@ class SentimentAnalyzer < Sinatra::Base
   NEGATIVE = File.open("./config/rt-polaritydata/rt-polarity.neg", "rb").to_a
 
   helpers do
-    def description(sentence)
-      YAML::dump(Corpus.sparse_vector(@sentence).keys)
-    end
-
     def prediction(sentence)
-      SentimentModel.predict(Corpus.vector(@sentence))
+      SentimentModel.classify(@sentence)
     end
 
     def assign_vars(sentence)
       @sentence = sentence
-      @description = description(@description)
       @prediction = prediction(@description)
     end
   end
 
   get '/' do
-    @positive = REDIS.get("sentiment_analyzer:rt-polarity.pos:processed")
-    @negative = REDIS.get("sentiment_analyzer:rt-polarity.neg:processed")
-
     erb :home
   end
 

@@ -3,6 +3,7 @@ class SentimentClassifier
 
   def initialize(corpus_set)
     @corpus_set = corpus_set
+    @c = 2 ** 7
   end
 
   def c=(cc)
@@ -12,11 +13,6 @@ class SentimentClassifier
 
   def words
     @corpus_set.words
-  end
-
-  def g=(g)
-    @g = g
-    @model = nil
   end
 
   def self.build(files)
