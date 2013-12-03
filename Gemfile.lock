@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    algorithms (0.6.1)
     ffi (1.9.3)
     listen (1.0.3)
       rb-fsevent (>= 0.9.3)
@@ -32,6 +33,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  algorithms
   mini_magick
   puma
   rerun

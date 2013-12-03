@@ -1,51 +1,31 @@
-require 'opencv'
-require_relative 'face_features'
 class Face
-  def self.from_base64(base64)
-    encoded_data = Base64.decode64(base64)
-    filepath = File.join("/Users/matthewkirk/git/face_query/public/faces", SecureRandom.hex) + ".jpg"
-    File.open(filepath, 'wb') {|f| f.write(encoded_data)}
-    image = MiniMagick::Image.open(filepath)
-    image.colorspace 'Gray'
-    image.write(filepath)
-    detect_face(filepath)
+  include OpenCV
+  def initialize(filepath)
+    @filepath = filepath
   end
 
-  def self.detect_face(filepath)
-    data = './data/haarcascade_frontalface_alt.xml'
-    detector = OpenCV::CvHaarClassifierCascade::load(data)
-    image = OpenCV::CvMat.load(filepath, OpenCV::CV_LOAD_IMAGE_GRAYSCALE)
-
-    region = detector.detect_objects(image).first
-
-    color = OpenCV::CvColor::Blue
-    image.rectangle! region.top_left, region.bottom_right, :color => color
-
-    image.save_image(filepath)
-
-    avatar = extract_avatar(filepath, region)
-
-    {
-      :avatar => avatar,
-      :face => "faces/" + File.basename(filepath),
-      :face_features => FaceFeatures.extract(avatar)
-    }
+  def features
+    image = CvMat.load(@filepath, CV_LOAD_IMAGE_GRAYSCALE)
+    min_hessian = 500
+    param = CvSURFParams.new(min_hessian)
+    image.extract_surf(param).last
   end
 
-  def self.extract_avatar(filepath, region)
-    top_left = region.top_left
-    bottom_right = region.bottom_right
+  def write_annotated_image!
+    avatar = File.expand_path("../../public/#{@filepath}", __FILE__)
+    rgb = CvMat.load(avatar, CV_LOAD_IMAGE_COLOR)
+    kp, desc = features
 
-    x_size = bottom_right.x - top_left.x
-    y_size = bottom_right.y - top_left.y
+    kp.each do |r|
+      center = CvPoint.new(r.pt.x, r.pt.y)
+      color = CvColor::Yellow
+      radius = r.size * (1.2/9.0) * 2
+      rgb.circle! center, radius, :color => color
+    end
 
-    crop_params = "#{x_size - 1}x#{y_size-1}+#{top_left.x + 1}+#{top_left.y + 1}"
-    image = MiniMagick::Image.open(filepath)
+    extracted_features = "extracted_" + File.basename(avatar)
+    rgb.save_image('/Users/matthewkirk/git/face_query/public/faces/' + extracted_features)
 
-    image.crop crop_params
-
-    outfile = File.join("/Users/matthewkirk/git/face_query/public/faces", "avatar_" + File.basename(filepath))
-    image.write(outfile)
-    "faces/" + File.basename(outfile)
+    'faces/' + extracted_features
   end
 end
