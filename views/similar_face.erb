@@ -1,25 +1,31 @@
 <h1>Is this the right face?</h1>
 
-<img src="<%= @filepath.fetch(:face) %>"/>
+<img src="<%= image_url @image.filepath %>"/>
 
 <br/>
 
 Extracted
-<img src='<%= @filepath.fetch(:avatar) %>'>
+<img src='<%= image_url(@face.filepath) %>'>
 
-features
-<img src='<%= @filepath.fetch(:face_features) %>'>
+Features
+<img src='<%= image_url @face.annotated_image_path %>'>
 
-<h2> Best Matches </h2>
-<ol>
-  <% @similar_faces.first(5).each do |face, distance| %>
-    <li><img src='faces/<%= face %>'/> <%= distance %></li>
-  <% end %>
-</ol>
+<pre>
+  <%= YAML::dump(@guess)%>
+</pre>
 
-<h2> Worst Matches </h2>
-<ol>
-  <% @similar_faces.last(5).each do |face, distance| %>
-    <li><img src='faces/<%= face %>'/> <%= distance %></li>
-  <% end %>
-</ol>
+<h2>Do you wear glasses? <%= @glasses_inclination %></h2>
+<p>
+  <%= @guess.fetch('glasses').fetch(@glasses_inclination) %>
+  to
+  <%= @guess.fetch('glasses').fetch(!@glasses_inclination) %>
+  that you <%= (@glasses_inclination) ? 'do' : 'do not'%> wear glasses.
+</p>
+
+<h2>Do you have facial hair? <%= @facial_hair_inclination %></h2>
+<p>
+  <%= @guess.fetch('facial_hair').fetch(@facial_hair_inclination) %>
+  to
+  <%= @guess.fetch('facial_hair').fetch(!@facial_hair_inclination) %>
+  that you <%= (@facial_hair_inclination) ? 'do' : 'do not'%> have facial hair.
+</p>

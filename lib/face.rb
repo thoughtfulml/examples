@@ -16,21 +16,21 @@ class Face
     @keypoints ||= features.first
   end
 
-  def write_annotated_image!
-    rgb = CvMat.load(@filepath, CV_LOAD_IMAGE_COLOR)
-    kp, desc = features
+  def annotated_image_path
+    outpath = File.join(File.dirname(@filepath), 'extracted_' + File.basename(@filepath))
 
-    kp.each do |r|
-      center = CvPoint.new(r.pt.x, r.pt.y)
-      color = CvColor::Yellow
-      radius = r.size * (1.2/9.0) * 2
-      rgb.circle! center, radius, :color => color
+    Image.write(outpath) do
+      rgb = CvMat.load(@filepath, CV_LOAD_IMAGE_COLOR)
+
+      keypoints.each do |r|
+        center = CvPoint.new(r.pt.x, r.pt.y)
+        color = CvColor::Yellow
+        radius = r.size * (1.2/9.0) * 2
+        rgb.circle! center, radius, :color => color
+      end
+
+      rgb.save_image(outpath)
     end
-
-    extracted_features = "extracted_" + File.basename(@filepath)
-    rgb.save_image('/Users/matthewkirk/git/face_query/public/faces/' + extracted_features)
-
-    './public/faces/' + extracted_features
   end
 
   private

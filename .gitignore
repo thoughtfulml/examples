@@ -1,2 +1,3 @@
 public/faces
 .DS_Store
+public/att_faces/**/extracted_*

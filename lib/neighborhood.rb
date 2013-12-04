@@ -65,7 +65,6 @@ class Neighborhood
     votes
   end
 
-  private
   def nearest(file, k)
     desc = Face.new(file).descriptors
 

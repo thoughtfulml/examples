@@ -10,13 +10,24 @@ class Image
     @face_found = false
   end
 
+  def self.write(filepath, &block)
+    if File.exists?(filepath)
+    else
+      block.call
+    end
+    filepath
+  end
+
   def self.from_base64(base64)
-    encoded_data = Base64.decode64(base64)
-    filepath = File.join("/Users/matthewkirk/git/face_query/public/faces", SecureRandom.hex) + ".jpg"
-    File.open(filepath, 'wb') {|f| f.write(encoded_data)}
-    image = MiniMagick::Image.open(filepath)
-    image.colorspace 'Gray'
-    image.write(filepath)
+    filepath = File.join("./public/faces", Digest::MD5.hexdigest(base64)) + ".jpg"
+
+    write(filepath) do
+      encoded_data = Base64.decode64(base64)
+      image = MiniMagick::Image.from_blob(encoded_data)
+      image.colorspace 'Gray'
+      image.write(filepath)
+    end
+
     new(filepath)
   end
 
@@ -26,20 +37,22 @@ class Image
   end
 
   def to_face
-    region = face_region
-    top_left = region.top_left
-    bottom_right = region.bottom_right
+    outfile = File.join(".//public/faces", "avatar_" + File.basename(@filepath))
+    self.class.write(outfile) do
 
-    x_size = bottom_right.x - top_left.x
-    y_size = bottom_right.y - top_left.y
+      region = face_region
+      top_left = region.top_left
+      bottom_right = region.bottom_right
 
-    crop_params = "#{x_size - 1}x#{y_size-1}+#{top_left.x + 1}+#{top_left.y + 1}"
-    image = MiniMagick::Image.open(@filepath)
+      x_size = bottom_right.x - top_left.x
+      y_size = bottom_right.y - top_left.y
 
-    image.crop crop_params
+      crop_params = "#{x_size - 1}x#{y_size-1}+#{top_left.x + 1}+#{top_left.y + 1}"
+      image = MiniMagick::Image.open(@filepath)
+      image.crop crop_params
+      image.write(outfile)
+    end
 
-    outfile = File.join("/Users/matthewkirk/git/face_query/public/faces", "avatar_" + File.basename(@filepath))
-    image.write(outfile)
     Face.new("./public/faces/" + File.basename(outfile))
   end
 end
