@@ -2,7 +2,14 @@ source 'https://rubygems.org'
 
 gem 'sinatra'
 gem 'puma'
-gem 'rerun'
 gem 'mini_magick'
 gem 'ruby-opencv', :require => 'opencv'
 gem 'algorithms'
+
+group :development do
+  gem 'rerun'
+end
+
+group :test do
+  gem 'simplecov', :require => false
+end

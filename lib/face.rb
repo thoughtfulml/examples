@@ -1,19 +1,23 @@
 class Face
   include OpenCV
+  MIN_HESSIAN = 600
+
+  attr_reader :filepath
+
   def initialize(filepath)
     @filepath = filepath
   end
 
-  def features
-    image = CvMat.load(@filepath, CV_LOAD_IMAGE_GRAYSCALE)
-    min_hessian = 500
-    param = CvSURFParams.new(min_hessian)
-    image.extract_surf(param).last
+  def descriptors
+    @descriptors ||= features.last
+  end
+
+  def keypoints
+    @keypoints ||= features.first
   end
 
   def write_annotated_image!
-    avatar = File.expand_path("../../public/#{@filepath}", __FILE__)
-    rgb = CvMat.load(avatar, CV_LOAD_IMAGE_COLOR)
+    rgb = CvMat.load(@filepath, CV_LOAD_IMAGE_COLOR)
     kp, desc = features
 
     kp.each do |r|
@@ -23,9 +27,16 @@ class Face
       rgb.circle! center, radius, :color => color
     end
 
-    extracted_features = "extracted_" + File.basename(avatar)
+    extracted_features = "extracted_" + File.basename(@filepath)
     rgb.save_image('/Users/matthewkirk/git/face_query/public/faces/' + extracted_features)
 
-    'faces/' + extracted_features
+    './public/faces/' + extracted_features
+  end
+
+  private
+  def features
+    image = CvMat.load(@filepath, CV_LOAD_IMAGE_GRAYSCALE)
+    param = CvSURFParams.new(MIN_HESSIAN)
+    @keypoints, @descriptors = image.extract_surf(param)
   end
 end

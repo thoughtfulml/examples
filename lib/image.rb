@@ -1,9 +1,9 @@
-require 'opencv'
-require_relative 'face_features'
-
+require 'base64'
 class Image
   HAAR_FILEPATH = './data/haarcascade_frontalface_alt.xml'
   FACE_DETECTOR = OpenCV::CvHaarClassifierCascade::load(HAAR_FILEPATH)
+
+  attr_reader :filepath
 
   def initialize(filepath)
     @filepath = filepath
@@ -22,7 +22,7 @@ class Image
 
   def face_region
     @image = OpenCV::CvMat.load(@filepath, OpenCV::CV_LOAD_IMAGE_GRAYSCALE)
-    FACE_DETECTOR.detect_objects(image).first
+    FACE_DETECTOR.detect_objects(@image).first
   end
 
   def to_face
@@ -38,24 +38,8 @@ class Image
 
     image.crop crop_params
 
-    outfile = File.join("/Users/matthewkirk/git/face_query/public/faces", "avatar_" + File.basename(filepath))
+    outfile = File.join("/Users/matthewkirk/git/face_query/public/faces", "avatar_" + File.basename(@filepath))
     image.write(outfile)
-    Face.new("faces/" + File.basename(outfile))
+    Face.new("./public/faces/" + File.basename(outfile))
   end
-
-  #
-  # def draw_rectangle!
-  #   color = OpenCV::CvColor::Blue
-  #   image.rectangle! region.top_left, region.bottom_right, :color => color
-  #
-  #   image.save_image(filepath)
-  #
-  #   avatar = extract_avatar(filepath, region)
-  #
-  #   {
-  #     :avatar => avatar,
-  #     :face => "faces/" + File.basename(filepath),
-  #     :face_features => FaceFeatures.extract(avatar)
-  #   }
-  # end
 end

@@ -1,13 +1,15 @@
-require_relative 'face'
-
+require 'json'
 class Neighborhood
+  K = 4
+
   def initialize(files)
     @ids = {}
+    @files = files
     counter = 0
     kdtree_hash = {}
 
-    files.each do |f|
-      desc = Face.new(f).features
+    @files.each do |f|
+      desc = Face.new(f).descriptors
       desc.each do |d|
         @ids[counter] = f
         kdtree_hash[counter] = d
@@ -19,13 +21,53 @@ class Neighborhood
   end
 
   def attributes
-    @attributes ||= Hash[Dir['./public/att_faces/**/attributes.json'].map do |att|
+    dir_glob = @files.map do |file|
+      File.join(File.dirname(file), 'attributes.json')
+    end.uniq
+
+    @attributes ||= Hash[Dir.glob(dir_glob).map do |att|
       [att.split("/")[-2], JSON.parse(File.read(att))]
     end]
   end
 
+  def self.face_class(filename, subkeys)
+    dir = File.dirname(filename)
+    base = File.basename(filename, '.png')
+    json = JSON.parse(File.read(File.join(dir, "attributes.json")))
+    @h = nil
+    if json.is_a?(Array)
+      @h = json.find do |hh|
+        hh.fetch('ids').include?(base.to_i)
+      end or raise "Cannot find #{base.to_i} inside of #{json} for file #{filename}"
+    else
+      @h = json
+    end
+
+    @h.select {|k,v| subkeys.include?(k) }
+  end
+
+  def attributes_guess(file, k = K)
+    ids = nearest(file, k)
+
+    votes = {
+      'glasses' => {false => 0, true => 0},
+      'facial_hair' => {false => 0, true => 0}
+    }
+
+    ids.each do |id|
+      resp = self.class.face_class(@ids[id], %w[glasses facial_hair])
+
+      resp.each do |k,v|
+        votes[k][v] += 1
+      end
+    end
+
+    votes
+  end
+
+  private
   def nearest(file, k)
-    desc = Face.new(file).features
+    desc = Face.new(file).descriptors
 
     ids = []
 
@@ -33,63 +75,6 @@ class Neighborhood
       ids.concat(@kd_tree.find_nearest(d, k).map(&:last))
     end
 
-    ids
+    ids.uniq
   end
-
-  def most_voted_for(file, k)
-    ids = nearest(file, k)
-    glasses_true = 0
-    glasses_false = 0
-
-    ids.each do |id|
-      puts id
-      if attributes[@ids.fetch(id).split("/")[-2]].fetch('glasses')
-        glasses_true += 1
-      else
-        glasses_false += 1
-      end
-    end
-
-    {
-      :glasses_true => glasses_true,
-      :glasses_False => glasses_false
-    }
-
-  end
-
-  # def nearest(matrix, k)
-  #     descriptors = {}
-  #     distances_from = {}
-  #
-  #     @files.each do |f|
-  #       _, desc = Face.new(f).features
-  #
-  #       key = File.basename(f)
-  #       descriptors[key] = desc
-  #       distances_from[key] = distance(desc, matrix)
-  #     end
-  #
-  #     distances_from.sort_by(&:last).first(k)
-  #   end
-  #
-  #   def distance(matrix1, matrix2)
-  #     matrix = Matrix.build(matrix1.length, matrix2.length) do |row, col|
-  #       euclidean_distance(matrix1[row], matrix2[col])
-  #     end
-  #
-  #     # find the closest match even if it's been seen befor
-  #     matrix.row_vectors.map(&:min).inject(&:+)
-  #   end
-  #
-  #   def euclidean_distance(vec1, vec2)
-  #     raise 'Error' unless vec1.length == vec2.length
-  #
-  #     sum_sq = 0.0
-  #
-  #     vec1.each_with_index do |v, i|
-  #       sum_sq += (v - vec2[i]) ** 2
-  #     end
-  #
-  #     Math::sqrt(sum_sq)
-  #   end
 end
