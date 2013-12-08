@@ -23,7 +23,7 @@ class Image
 
     write(filepath) do
       encoded_data = Base64.decode64(base64)
-      image = MiniMagick::Image.from_blob(encoded_data)
+      image = MiniMagick::Image.read(encoded_data)
       image.colorspace 'Gray'
       image.write(filepath)
     end

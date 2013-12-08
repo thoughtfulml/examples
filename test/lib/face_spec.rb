@@ -6,7 +6,7 @@ describe Face do
   it 'writes an annotated image' do
     @face = Face.new(avatar_path)
 
-    file = @face.write_annotated_image!
+    file = @face.annotated_image_path
 
     actual_md5 = Digest::MD5.hexdigest(File.read(file))
     expected_md5 = Digest::MD5.hexdigest(File.read(avatar_path))
