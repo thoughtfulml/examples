@@ -12,14 +12,14 @@ describe Face do
     expected_md5 = Digest::MD5.hexdigest(File.read(avatar_path))
   end
 
-  it 'should have the same descriptors for the same faces' do
+  it 'has the same descriptors for the exact same face' do
     @face = Face.new(avatar_path)
     @face2 = Face.new(avatar_path)
 
     @face.descriptors.must_equal @face2.descriptors
   end
 
-  it 'should have the same keypoints for the same face' do
+  it 'has the same keypoints for the exact same face' do
     @face = Face.new(avatar_path)
     @face2 = Face.new(avatar_path)
 
