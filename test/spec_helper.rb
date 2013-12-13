@@ -5,6 +5,7 @@ SimpleCov.start
 require 'minitest/autorun'
 require 'minitest/pride'
 require 'bundler'
+require 'phashion'
 Bundler.require
 
 require File.expand_path('../../lib/image.rb', __FILE__)

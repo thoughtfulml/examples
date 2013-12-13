@@ -93,6 +93,15 @@ describe Neighborhood do
     n.attributes.must_equal expected
   end
 
+  it 'finds the nearest id for a given face' do
+    files = ['./test/fixtures/avatar.jpg']
+    n = Neighborhood.new(files)
+
+    n.nearest_feature_ids(files.first, 1).each do |id|
+      n.file_from_id(id).must_equal files.first
+    end
+  end
+
   it 'returns the proper face class' do
     file = './public/att_faces/s1/1.png'
     attrs = JSON.parse(File.read('./public/att_faces/s1/attributes.json'))

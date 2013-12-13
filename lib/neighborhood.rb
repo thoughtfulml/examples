@@ -47,7 +47,7 @@ class Neighborhood
   end
 
   def attributes_guess(file, k = K)
-    ids = nearest(file, k)
+    ids = nearest_feature_ids(file, k)
 
     votes = {
       'glasses' => {false => 0, true => 0},
@@ -65,7 +65,11 @@ class Neighborhood
     votes
   end
 
-  def nearest(file, k)
+  def file_from_id(id)
+    @ids.fetch(id)
+  end
+
+  def nearest_feature_ids(file, k)
     desc = Face.new(file).descriptors
 
     ids = []

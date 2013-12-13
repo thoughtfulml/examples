@@ -11,5 +11,6 @@ group :development do
 end
 
 group :test do
+  gem 'phashion'
   gem 'simplecov', :require => false
 end
