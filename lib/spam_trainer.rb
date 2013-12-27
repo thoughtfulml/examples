@@ -1,100 +1,131 @@
 require 'yaml'
 class SpamTrainer
   Classification = Struct.new(:guess, :score)
-  def initialize(keyfile, n = 3)
-    @keyfile = keyfile
+  SmallestDelta = 0.01
+  attr_reader :n
+  attr_accessor :logger
+
+  def initialize(training_files, n = 1)
     @n = n
-    @training = {
-      'spam' => Hash.new(0),
-      'ham' => Hash.new(0),
-    }
-    @doc_count = 0
+
+    training_files.each do |tf|
+      redis.sadd('categories', tf.first)
+      redis.hset('totals', tf.first, 0)
+    end
+
+    redis.hset('totals', '_all', 0)
+
+    @logger = Logger.new(STDOUT)
+    @logger.level = Logger::WARN
+
+    @to_train = training_files
   end
 
-  def self.from_file(file)
-    f = YAML::load_file(file)
-    st = new(f.fetch(:keyfile))
-    st.instance_variable_set("@doc_count", f.fetch(:doc_count))
-    st.instance_variable_set("@training", f.fetch(:training))
-    st.instance_variable_set("@trained", true)
-    st
+  def redis
+    @redis ||= Redis::Namespace.new(SecureRandom.hex)
   end
 
-  def to_file(path)
-    File.open(path, 'wb') do |f|
-      f.write(YAML::dump({:doc_count => @doc_count, :training => @training, :keyfile => @keyfile}))
+  def total_for(category)
+    redis.hget('totals', category).to_i
+  end
+
+  def categories
+    redis.smembers('categories')
+  end
+
+  def preference
+    @preference ||= begin
+      categories.sort_by {|cat| total_for(cat) }
     end
   end
 
   def train!
-    current_file = ''
-    File.open(@keyfile, 'r').each_line do |line|
-      label, file = line.split(' ')
-      current_file = file
-      spam_or_ham = self.class.label_to_name(label)
-      email = Email.new("./data/TRAINING/#{file}")
-
-      Tokenizer.ngram(email.body, @n) do |ngram|
-        @training[spam_or_ham][ngram.join(":")] += 1
-        @doc_count += 1
-      end
-
-      Tokenizer.ngram(email.subject, @n) do |ngram|
-        @training[spam_or_ham][ngram.join(":")] += 1
-        @doc_count += 1
-      end
+    @to_train.each do |category, file|
+      write(category, file)
     end
-
-    @spam_count = @training['spam'].values.inject(&:+)
-    @ham_count = @training['ham'].values.inject(&:+)
-    puts "Done training"
-    @trained = true
+    @to_train = []
   end
 
-  def perplexity
-    2 ** (-entropy)
+  def write(category, file)
+    email = Email.new(file)
+    logger.debug("#{category} #{file}")
+    Tokenizer.ngram(email.blob, @n) do |ngram|
+      redis.hincrby(category, ngram.join(':'), 1)
+      redis.hincrby('totals', '_all', 1)
+      redis.hincrby('totals', category, 1)
+    end
+  end
+
+  def trained?
+    @to_train.empty?
   end
 
   def entropy
-    sum = 0
-    @training.each do |cat, data|
-      data.each do |ngram, count|
-        probability = Rational(count, @doc_count)
-        sum += probability * Math::log2(probability)
+    train!
+    entropy = 0
+
+    categories.each do |category|
+      # Ugh I wish that we could all just use redis 2.8.0
+
+      redis.hgetall(category).each do |token, count|
+        prob = Rational(count.to_i, total_for("_all"))
+        entropy += prob * Math::log2(prob)
       end
     end
-    sum
+    entropy
   end
 
-  def self.label_to_name(label)
-    (label == '1') ? 'ham' : 'spam'
+  def perplexity
+    2 ** -(entropy)
   end
 
   def score(email)
-    raise 'Not Trained' if !@trained
+    train!
 
-    hams = []
-    spams = []
-    Tokenizer.ngram([email.body, email.subject].join("\n"), @n) do |ngram|
-      p_ham = Rational(@ham_count, @doc_count)
-      p_spam = Rational(@spam_count, @doc_count)
+    raise 'Must implement #blob on given object' unless email.respond_to?(:blob)
 
-      p_ngram_spam = Rational(@training['spam'].fetch(ngram.join(":"), 0) + 1, @spam_count)
-      p_ngram_ham = Rational(@training['ham'].fetch(ngram.join(":"),0) + 1, @ham_count)
+    average_probabilities = Hash.new(0)
+    count = 0
 
-      p_part = (p_ngram_spam * p_spam)
+    Tokenizer.ngram(email.blob, @n) do |ngram|
+      category_probs = {}
+      ngram_probs = {}
+      parts = {}
 
-      p_spam_given_words = (p_part) / (p_part + p_ngram_ham * p_ham).to_f
+      categories.each do |cat|
+        category_probs[cat] = Rational(total_for(cat), total_for("_all"))
+        ngram_probs[cat] = Rational(redis.hget(cat, ngram.join(':')).to_i + 1, total_for(cat))
+        parts[cat] = ngram_probs[cat] * category_probs[cat]
+      end
 
-      spams << p_spam_given_words
-      hams << 1 - p_spam_given_words
+      denom = parts.values.inject(&:+)
+
+      categories.each do |cat|
+        before = average_probabilities[cat]
+        average_probabilities[cat] = before + Rational((Rational(parts[cat], denom) - before), (count + 1))
+      end
     end
 
-    {'ham' => hams.inject(&:+) / hams.length, 'spam' => spams.inject(&:+) / spams.length}
+    average_probabilities
   end
 
   def classify(email)
-    Classification.new(*score(email).max_by(&:last))
+    score = score(email)
+    max_score = 0.0
+    max_key = nil
+    score.each do |k,v|
+      if v > max_score
+        max_key = k
+        max_score = v
+      elsif v == max_score && !max_key.nil? && preference.index(k) > preference.index(max_key)
+        max_key = k
+        max_score = v
+      else
+        # Do nothing
+      end
+    end
+
+    Classification.new(max_key, max_score)
   end
 
   def inspect

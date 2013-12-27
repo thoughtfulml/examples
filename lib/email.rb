@@ -3,10 +3,12 @@ require 'forwardable'
 class Email
   extend Forwardable
 
+  attr_reader :filepath, :category
   def_delegators :@mail, :subject, :content_type
 
-  def initialize(filepath, use_cache = true)
+  def initialize(filepath, category = nil)
     @filepath = filepath
+    @category = category
     @mail = Mail.read(filepath)
   end
 
@@ -21,6 +23,10 @@ class Email
     end
   end
 
+  def blob
+    "#{body.to_s.force_encoding('UTF-8')}\n#{subject.to_s.force_encoding('UTF-8')}"
+  end
+
   private
   def simplify(content_type)
     content_type.to_s.split(';').first
@@ -31,7 +37,7 @@ class Email
     when 'text/html'
       Nokogiri::HTML.parse(body).inner_text
     when 'text/plain'
-      body
+      body.to_s
     else
       ''
     end

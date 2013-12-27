@@ -1,60 +1,83 @@
 require_relative '../spec_helper'
+File.open("report.txt", "wb") {|f| f.write("") }
 if ENV['CROSS_VALIDATE'] == 't'
   describe 'Cross Validation' do
-    def self.folds
-      [
-        './test/fixtures/fold1.label',
-        './test/fixtures/fold2.label'
-      ]
-    end
+    LOGGER = Logger.new(STDOUT, :debug)
 
     def self.test_order
       :alpha
     end
 
-    folds.each do |fold|
-      other_fold = folds.find {|f| f != fold }
-      (1..5).each do |gram|
-        it "validates #{fold} against #{other_fold} with a #{gram}-Gram model" do
+    def self.label_to_training_data(fold_file, n = 1)
+      training_data = []
+      st = SpamTrainer.new([], n)
 
-          cache_path = "./test/fixtures/cached/#{File.basename(fold, '.label')}_#{gram}.yml"
-          trained_spam = nil
-          if File.exists?(cache_path)
-            trained_spam = SpamTrainer.from_file(cache_path)
-          else
-            trained_spam = SpamTrainer.new(fold, gram)
-            puts "Training"
-            trained_spam.train!
-            puts "Done training saving"
-            trained_spam.to_file(cache_path)
-          end
+      data = File.read(fold_file).split("\n")
 
-          correct = 0
-          errors = 0
+      data.each do |line|
+        label, file = line.split(/\s+/)
+        filepath = File.join("./data/TRAINING", file)
+        klass = (label == '1') ? 'ham' : 'spam'
+        st.write(klass, filepath)
+      end
 
-          confidence = 0.0
-          File.open(other_fold, 'r').each_line do |line|
-            label, file = line.split(/\s+/)
-            e = Email.new(File.join('./data/TRAINING', file))
+      st
+    end
 
-            classification = trained_spam.classify(e)
-            confidence += classification.score
+    def self.parse_emails(keyfile)
+      emails = []
+      puts "Parsing emails for #{keyfile}"
+      File.open(keyfile, 'rb').each_line do |line|
+        label, file = line.chomp.split(/\s+/)
+        filepath = File.join("./data/TRAINING", file)
+        klass = (label == '1') ? 'ham' : 'spam'
+        emails << Email.new(filepath, klass)
+        LOGGER.debug("#{filepath} finished")
+      end
+      puts "Done parsing emails for #{keyfile}"
+      emails
+    end
 
-            if classification.guess == 'spam' && classification.guess != SpamTrainer::label_to_name(label)
-              errors += 1
-            else
-              correct += 1
-            end
-          end
+    def self.validate(trainer, set_of_emails)
+      correct = 0
+      errors = 0
+      confidence = 0.0
 
-          message = <<-EOL
-          Error Rate: #{errors / (errors + correct).to_f}.
-          Avg Confidence: #{confidence / (errors + correct)}.
-          Perplexity: #{trained_spam.perplexity}
-          Gram: #{gram}
-          EOL
-          skip(message)
+      set_of_emails.each do |email|
+        classification = trainer.classify(email)
+        confidence += classification.score
+
+        if classification.guess == 'spam' && email.category == 'ham'
+          errors += 1
+        else
+          correct += 1
         end
+      end
+
+      message = <<-EOL
+      Error Rate: #{errors / (errors + correct).to_f}.
+      Avg Confidence: #{confidence / (errors + correct)}.
+      Perplexity: #{trainer.perplexity}
+      Gram: #{trainer.n}
+      EOL
+      message
+    end
+
+    describe "Fold1 unigram model" do
+      let(:trainer) { self.class.label_to_training_data('./test/fixtures/fold1.label', 1) }
+      let(:emails) { self.class.parse_emails('./test/fixtures/fold2.label') }
+
+      it "validates fold1 against fold2 with a unigram model" do
+        skip(self.class.validate(trainer, emails))
+      end
+    end
+
+    describe "Fold2 unigram model" do
+      let(:trainer) { self.class.label_to_training_data('./test/fixtures/fold2.label', 1) }
+      let(:emails) { self.class.parse_emails('./test/fixtures/fold1.label') }
+
+      it "validates fold2 against fold1 with a unigram model" do
+        skip(self.class.validate(trainer, emails))
       end
     end
   end
