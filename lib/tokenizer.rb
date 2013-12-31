@@ -18,12 +18,24 @@ module Tokenizer
     yield(current_word.downcase) unless current_word.empty?
   end
 
-  def ngram(string, n = 2, &block)
+  def ngram(string, n = 1, &block)
     current_ngram_window = (n-1).times.map { "\u0000" }
     tokenize(string) do |token|
       current_ngram_window << token
       current_ngram_window.shift if current_ngram_window.length == (n + 1)
       block.call(current_ngram_window)
+    end
+  end
+
+  def unique_tokenizer(string, &block)
+    visited = Set.new
+
+    tokenize(string) do |token|
+      if visited.include?(token)
+      else
+        yield(token)
+        visited << token
+      end
     end
   end
 

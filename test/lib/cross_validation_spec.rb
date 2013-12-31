@@ -1,5 +1,5 @@
 require_relative '../spec_helper'
-File.open("report.txt", "wb") {|f| f.write("") }
+
 if ENV['CROSS_VALIDATE'] == 't'
   describe 'Cross Validation' do
     LOGGER = Logger.new(STDOUT, :debug)
@@ -8,17 +8,13 @@ if ENV['CROSS_VALIDATE'] == 't'
       :alpha
     end
 
-    def self.label_to_training_data(fold_file, n = 1)
+    def self.label_to_training_data(fold_file)
       training_data = []
-      st = SpamTrainer.new([], n)
+      st = SpamTrainer.new([])
 
-      data = File.read(fold_file).split("\n")
-
-      data.each do |line|
+      File.open(fold_file, 'rb').each_line do |line|
         label, file = line.split(/\s+/)
-        filepath = File.join("./data/TRAINING", file)
-        klass = (label == '1') ? 'ham' : 'spam'
-        st.write(klass, filepath)
+        st.write(label, file)
       end
 
       st
@@ -28,11 +24,8 @@ if ENV['CROSS_VALIDATE'] == 't'
       emails = []
       puts "Parsing emails for #{keyfile}"
       File.open(keyfile, 'rb').each_line do |line|
-        label, file = line.chomp.split(/\s+/)
-        filepath = File.join("./data/TRAINING", file)
-        klass = (label == '1') ? 'ham' : 'spam'
-        emails << Email.new(filepath, klass)
-        LOGGER.debug("#{filepath} finished")
+        label, file = line.split(/\s+/)
+        emails << Email.new(filepath, label)
       end
       puts "Done parsing emails for #{keyfile}"
       emails
@@ -40,31 +33,32 @@ if ENV['CROSS_VALIDATE'] == 't'
 
     def self.validate(trainer, set_of_emails)
       correct = 0
-      errors = 0
+      false_positives = 0.0
+      false_negatives = 0.0
       confidence = 0.0
 
       set_of_emails.each do |email|
         classification = trainer.classify(email)
         confidence += classification.score
-
         if classification.guess == 'spam' && email.category == 'ham'
-          errors += 1
+          false_positives += 1
+        elsif classification.guess == 'ham' && email.category == 'spam'
+          false_negatives += 1
         else
           correct += 1
         end
       end
 
       message = <<-EOL
-      Error Rate: #{errors / (errors + correct).to_f}.
-      Avg Confidence: #{confidence / (errors + correct)}.
-      Perplexity: #{trainer.perplexity}
-      Gram: #{trainer.n}
+      False Positive Rate (Bad): #{false_positives / (false_positives + false_negatives + correct)}
+      False Negative Rate (not so bad): #{false_negatives / (false_positives + false_negatives + correct)}
+      Error Rate: #{(false_positives + false_negatives) / (false_positives + false_negatives + correct)}
       EOL
       message
     end
 
     describe "Fold1 unigram model" do
-      let(:trainer) { self.class.label_to_training_data('./test/fixtures/fold1.label', 1) }
+      let(:trainer) { self.class.label_to_training_data('./test/fixtures/fold1.label') }
       let(:emails) { self.class.parse_emails('./test/fixtures/fold2.label') }
 
       it "validates fold1 against fold2 with a unigram model" do
@@ -73,7 +67,7 @@ if ENV['CROSS_VALIDATE'] == 't'
     end
 
     describe "Fold2 unigram model" do
-      let(:trainer) { self.class.label_to_training_data('./test/fixtures/fold2.label', 1) }
+      let(:trainer) { self.class.label_to_training_data('./test/fixtures/fold2.label') }
       let(:emails) { self.class.parse_emails('./test/fixtures/fold1.label') }
 
       it "validates fold2 against fold1 with a unigram model" do

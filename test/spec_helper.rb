@@ -12,5 +12,3 @@ Bundler.require
 require File.expand_path('../../lib/email.rb', __FILE__)
 require File.expand_path('../../lib/tokenizer.rb', __FILE__)
 require File.expand_path('../../lib/spam_trainer.rb', __FILE__)
-
-Redis.new.flushall
