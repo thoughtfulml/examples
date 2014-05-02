@@ -10,7 +10,11 @@ end
 task :console do
   require 'irb'
   require 'irb/completion'
-  require './lib/part_of_speech_tagger.rb'
+  def reload!
+    Dir["./lib/**/*.rb"].each {|_| load _ }
+  end
+
+  reload!
   ARGV.clear
   IRB.start
 end
