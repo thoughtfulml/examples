@@ -11,7 +11,7 @@ describe POSTagger do
 
   describe 'viterbi' do
     let(:training) { "I/PRO want/V to/TO race/V ./. I/PRO like/V cats/N ./." }
-    let(:sentence) { 'I want to race .' }
+    let(:sentence) { 'I want to race.' }
     let(:pos_tagger) {
       pos_tagger = POSTagger.new([training_file(training)])
       pos_tagger.train!

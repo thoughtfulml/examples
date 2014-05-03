@@ -1,12 +1,17 @@
 require 'set'
+require 'benchmark'
 
 class POSTagger
-  def initialize(files_to_parse =  [])
+  def initialize(files_to_parse =  [], eager = false)
     @corpus_parser = CorpusParser.new
     @redis = Redis.new
     @data_files = files_to_parse
-    @trained = false
 
+    if eager
+      train!
+    else
+      @trained = false
+    end
   end
 
   def train!
@@ -35,7 +40,7 @@ class POSTagger
     if denom.zero?
       0
     else
-      Rational(@tag_combos["#{previous_tag}/#{current_tag}"], denom)
+      @tag_combos["#{previous_tag}/#{current_tag}"] / denom.to_f
     end
   end
 
@@ -47,7 +52,7 @@ class POSTagger
     if denom.zero?
       0
     else
-      Rational(@word_tag_combos["#{word}/#{tag}"], denom)
+      @word_tag_combos["#{word}/#{tag}"] / denom.to_f
     end
   end
 
@@ -82,48 +87,48 @@ class POSTagger
   end
 
   def viterbi(sentence)
-    parts = sentence.split(/\s+/)
+    parts = sentence.gsub(/[\.\?!]/) {|a| " #{a}" }.split(/\s+/)
 
-    optimal_sequence = [{}]
-    backpointers = [{}]
+    last_viterbi = {}
+    backpointers = ["START"]
 
     @tags.each do |tag|
       if tag == 'START'
         next
       else
-        optimal_sequence.first[tag] = tag_probability("START", tag) * word_tag_probability(parts.first, tag)
-        backpointers.first[tag] = "START"
+        probability =  tag_probability("START", tag) * word_tag_probability(parts.first, tag)
+        if probability > 0
+          last_viterbi[tag] = probability
+        end
       end
     end
 
+    backpointers << (last_viterbi.max_by{|k,v| v} || @tag_frequencies.max_by{|k,v| v}).first
+
     parts[1..-1].each do |part|
       viterbi = {}
-      backpointer = {}
-      prev_viterbi = optimal_sequence.last
-
       @tags.each do |tag|
         next if tag == 'START'
+        break if last_viterbi.empty?
 
-        best_previous = prev_viterbi.max_by do |prev_tag, probability|
+        best_previous = last_viterbi.max_by do |prev_tag, probability|
           probability * tag_probability(prev_tag, tag) * word_tag_probability(part, tag)
         end
 
         best_tag = best_previous.first
 
-        viterbi[tag] = prev_viterbi[best_tag] * tag_probability(best_tag, tag) * word_tag_probability(part, tag)
+        probability = last_viterbi[best_tag] * tag_probability(best_tag, tag) * word_tag_probability(part, tag)
 
-        backpointer[tag] = best_tag
+        if probability > 0
+          viterbi[tag] = probability
+        end
       end
 
-      optimal_sequence << viterbi
-      backpointers << backpointer
+
+      last_viterbi = viterbi
+      
+      backpointers << (last_viterbi.max_by{|k,v| v} || @tag_frequencies.max_by{|k,v| v }).first
     end
-
-    current_tag = optimal_sequence.last.max_by {|k,v| v }.first
-    ending = [current_tag]
-
-    backpointers.reverse.map do |bp|
-      current_tag = bp[current_tag]
-    end.reverse + ending
+    backpointers
   end
 end

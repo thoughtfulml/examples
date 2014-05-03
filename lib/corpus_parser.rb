@@ -1,7 +1,7 @@
 class CorpusParser
   TagWord = Struct.new(:word, :tag)
   NULL_CHARACTER = "START"
-  STOP = " "
+  STOP = " \n"
   SPLITTER = '/'
 
   def initialize
@@ -16,11 +16,11 @@ class CorpusParser
     parse_word = true
 
     string.each_char do |char|
-      if char == "\t"
+      if char == "\t" || (word.empty? && STOP.include?(char))
         next
       elsif char == SPLITTER
         parse_word = false
-      elsif char == STOP
+      elsif STOP.include?(char)
         ngrams.shift
         ngrams << TagWord.new(word, pos)
 
