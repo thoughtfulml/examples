@@ -1,19 +1,19 @@
 class CorpusParser
+  TagWord = Struct.new(:word, :tag)
   NULL_CHARACTER = "START"
   STOP = " "
   SPLITTER = '/'
 
-  def initialize(ngram: 3)
-    @ngram = ngram
+  def initialize
+    @ngram = 2
   end
 
   def parse(string)
-    ngrams = @ngram.times.map { {NULL_CHARACTER => NULL_CHARACTER} }
+    ngrams = @ngram.times.map { TagWord.new(NULL_CHARACTER, NULL_CHARACTER) }
 
     word = ''
     pos = ''
     parse_word = true
-
 
     string.each_char do |char|
       if char == "\t"
@@ -22,7 +22,7 @@ class CorpusParser
         parse_word = false
       elsif char == STOP
         ngrams.shift
-        ngrams << {word => pos}
+        ngrams << TagWord.new(word, pos)
 
         yield ngrams
 
@@ -38,7 +38,7 @@ class CorpusParser
 
     unless pos.empty? || word.empty?
       ngrams.shift
-      ngrams << {word => pos}
+      ngrams << TagWord.new(word, pos)
       yield ngrams
     end
   end

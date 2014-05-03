@@ -1,15 +1,15 @@
 require 'spec_helper'
 
 describe CorpusParser do
-  let (:stream) { '	Several/ap defendants/nns ./.' } 
+  let (:stream) { 'Several/ap defendants/nns ./.' }
 
   it 'will parse a brown corpus line using the standard / notation' do
-    cp = CorpusParser.new(ngram: 2)
+    cp = CorpusParser.new
 
-    null = {"START" => "START"}
-    several = {"Several" => "ap"}
-    defendants = {"defendants" => "nns"}
-    period = {"." => "."}
+    null = CorpusParser::TagWord.new("START", "START")
+    several = CorpusParser::TagWord.new("Several", "ap")
+    defendants = CorpusParser::TagWord.new("defendants", "nns")
+    period = CorpusParser::TagWord.new(".", ".")
 
     expectations = [
       [null, several],

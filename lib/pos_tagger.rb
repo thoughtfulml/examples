@@ -1,13 +1,21 @@
+require 'set'
+
 class POSTagger
-  def initialize(files_to_parse =  [], ngrams = 2)
-    @corpus_parser = CorpusParser.new(ngram: ngrams)
+  def initialize(files_to_parse =  [])
+    @corpus_parser = CorpusParser.new
     @redis = Redis.new
     @data_files = files_to_parse
     @trained = false
+
   end
 
   def train!
     unless @trained
+      @tags = Set.new(["START"])
+      @tag_combos = Hash.new(0)
+      @tag_frequencies = Hash.new(0)
+      @word_tag_combos = Hash.new(0)
+
       @data_files.each do |df|
         File.foreach(df) do |line|
           @corpus_parser.parse(line) do |ngram|
@@ -19,94 +27,103 @@ class POSTagger
     end
   end
 
+  # Maximum liklihood estimate
+  # count(previous_tag, current_tag) / count(previous_tag)
   def tag_probability(previous_tag, current_tag)
-     
-  end
-
-  def word_tag_probability(word, tag)
-    num = @redis.hget("WORD/POS", "#{word}/#{tag}").to_i
-    denom = @redis.get("word_total").to_i
+    denom = @tag_frequencies[previous_tag]
 
     if denom.zero?
       0
     else
-      Rational(num, denom)
+      Rational(@tag_combos["#{previous_tag}/#{current_tag}"], denom)
     end
   end
 
-=begin
-  def vertibi(sentence)
-    pos_tags = @redis.get("tags")
-    parts = sentence.split(/\s+/)
+  # Maximum Liklihood estimate
+  # count (word and tag) / count(tag)
+  def word_tag_probability(word, tag)
+    denom = @tag_frequencies[tag]
 
-    part_length = parts.length
-
-    vertibi = []
-    backpointer = []
-
-
-    first_vertibi = {}
-    first_backpointer = {}
-
-    pos_tags.each do |tag|
-      if tag == "\0"
-        next
-      else
-        first_vertibi[tag] = conditional_prob["\0"].prob(tag) * cpd_tagwords[tag].prob (parts[0])
-        first_backpointer[tag] = "\0"
-      end
+    if denom.zero?
+      0
+    else
+      Rational(@word_tag_combos["#{word}/#{tag}"], denom)
     end
-
-    vertibi << first_vertibi
-    backpointer << first_backpointer
-
-    parts[1..-1].each do |part|
-      this_vertibi = {}
-      this_backpointer = {}
-      prev_vertibi = vertibi.last
-
-      pos_tags.each do |tag|
-        if tag == "\0"
-          next
-        else
-          best_previous = nil
-          best_prob = 0.0
-
-          prev_vertibi.keys.each do |prev_key|
-            prob = prev_vertibi[prev_key] * cpd_tags[prev_key].prob(tag) * cpd_tagwords[tag].prob(part)
-            if prob >= best_prob
-              best_previous = prev_key
-              best_prob = prob
-            end
-          end
-          this_vertibi[tag] = prev_vertibi[best_previous] * cpd_tags[best_previous].prob(tag) * cpd_tagwords[tag].prob(part)
-          this_backpointer[tag] = best_previous
-        end
-      end
-      vertibi << this_vertibi
-      backpointer << this_backpointer
-    end
-
   end
-=end
+
+  def probability_of_word_tag(word_sequence, tag_sequence)
+    raise 'The word and tags must be the same length!' if word_sequence.length != tag_sequence.length
+
+    # word_sequence %w[START I want to race .]
+    # Tag sequence %w[START PRO V TO V .]
+
+    length = word_sequence.length
+
+    probability = Rational(1,1)
+
+    (1...length).each do |i|
+      probability *= tag_probability(tag_sequence[i - 1], tag_sequence[i]) * word_tag_probability(word_sequence[i], tag_sequence[i])
+    end
+
+    probability
+  end
 
   def write(ngram)
-    @redis.hincrby('POS', ngram.map(&:values).flatten.join(":"), 1)
-    @redis.hincrby('WORD', ngram.map(&:keys).flatten.join(":"), 1)
-
-    if ngram.last.to_a[0][1] == '.'
-      ngram.each do |gram|
-        gg = gram.to_a.first
-        @redis.hincrby("WORD/POS", "#{gg[0]}/#{gg[1]}", 1)
-        @redis.incr('word_total')
-      end
-    else
-      nn = ngram.first.to_a[0]
-      @redis.hincrby('WORD/POS', "#{nn.first}/#{nn.last}", 1) 
-      @redis.incr('word_total')
+    if ngram.first.tag == 'START'
+      @tag_frequencies['START'] += 1
+      @word_tag_combos['START/START'] += 1
     end
 
-    @redis.incr('total_words')
-    @redis.incr(ngram.join(":"))
+    @tags << ngram.last.tag
+
+    @tag_frequencies[ngram.last.tag] += 1
+    @word_tag_combos[[ngram.last.word, ngram.last.tag].join("/")] += 1
+    @tag_combos[[ngram.first.tag, ngram.last.tag].join("/")] += 1
+  end
+
+  def viterbi(sentence)
+    parts = sentence.split(/\s+/)
+
+    optimal_sequence = [{}]
+    backpointers = [{}]
+
+    @tags.each do |tag|
+      if tag == 'START'
+        next
+      else
+        optimal_sequence.first[tag] = tag_probability("START", tag) * word_tag_probability(parts.first, tag)
+        backpointers.first[tag] = "START"
+      end
+    end
+
+    parts[1..-1].each do |part|
+      viterbi = {}
+      backpointer = {}
+      prev_viterbi = optimal_sequence.last
+
+      @tags.each do |tag|
+        next if tag == 'START'
+
+        best_previous = prev_viterbi.max_by do |prev_tag, probability|
+          probability * tag_probability(prev_tag, tag) * word_tag_probability(part, tag)
+        end
+
+        best_tag = best_previous.first
+
+        viterbi[tag] = prev_viterbi[best_tag] * tag_probability(best_tag, tag) * word_tag_probability(part, tag)
+
+        backpointer[tag] = best_tag
+      end
+
+      optimal_sequence << viterbi
+      backpointers << backpointer
+    end
+
+    current_tag = optimal_sequence.last.max_by {|k,v| v }.first
+    ending = [current_tag]
+
+    backpointers.reverse.map do |bp|
+      current_tag = bp[current_tag]
+    end.reverse + ending
   end
 end
