@@ -10,7 +10,7 @@ describe CorpusSet do
     negative_corp = Corpus.new(negative.path, :negative)
 
     corpus_set = CorpusSet.new([positive_corp, negative_corp])
-    corpus_set.words.must_equal %w[i love this country hate man]
+    corpus_set.words.must_equal %w[love country hate man]
   end
 
   it 'returns a set of sparse vectors to train on' do
@@ -22,14 +22,18 @@ describe CorpusSet do
     corpus_set = CorpusSet.new([positive_corp, negative_corp])
 
     expected_ys = [1, -1]
-    expected_xes = [[0,1,2,3], [0,4,2,5]]
+    expected_xes = [[0,1], [2,3]]
     expected_xes.map! do |x|
-      Hash[x.map {|i| [i, 1]}]
+      Libsvm::Node.features(Hash[x.map {|i| [i, 1]}])
     end
 
     ys, xes = corpus_set.to_sparse_vectors
 
     ys.must_equal expected_ys
-    xes.must_equal expected_xes
+
+    xes.flatten.zip(expected_xes.flatten).each do |x, xp|
+      x.value.must_equal xp.value
+      x.index.must_equal xp.index
+    end
   end
 end

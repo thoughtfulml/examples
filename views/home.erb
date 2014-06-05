@@ -1,4 +1,4 @@
-<% if !@negative || !@positive %>
+<% if !SentimentModel.trained? %>
   <p class='alert alert-warning'> Still training and building SVM </p>
 <% else %>
   <p class='alert alert-info'> Model done processing </p>
