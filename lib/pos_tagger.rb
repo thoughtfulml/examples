@@ -4,7 +4,6 @@ require 'benchmark'
 class POSTagger
   def initialize(files_to_parse =  [], eager = false)
     @corpus_parser = CorpusParser.new
-    @redis = Redis.new
     @data_files = files_to_parse
 
     if eager
@@ -84,6 +83,10 @@ class POSTagger
     @tag_frequencies[ngram.last.tag] += 1
     @word_tag_combos[[ngram.last.word, ngram.last.tag].join("/")] += 1
     @tag_combos[[ngram.first.tag, ngram.last.tag].join("/")] += 1
+  end
+
+  def pretty_viterbi(sentence)
+    viterbi(sentence).map {|tag| TAGS_TO_NAMES.fetch(tag.upcase, tag) }
   end
 
   def viterbi(sentence)

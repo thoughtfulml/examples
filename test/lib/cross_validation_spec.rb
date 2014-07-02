@@ -19,10 +19,10 @@ describe "Cross Validation" do
 
     it "cross validates with a low error for fold #{i}" do
       pos_tagger = POSTagger.new(files.values_at(*training_indexes), true)
+      misses = 0
+      successes = 0
 
       validation_data.each do |vf|
-        misses = 0
-        successes = 0
         File.read(vf).each_line do |l|
           if l =~ /\A\s+\z/
             next
@@ -40,8 +40,9 @@ describe "Cross Validation" do
             successes += tag_seq.zip(parts_of_speech).count {|k,v| k == v }
           end
         end
+        puts Rational(misses, successes + misses).to_f
       end
-      skip("Error rate for #{vf} was #{misses / (successes + misses).to_f}")
+      skip("Error rate was #{misses / (successes + misses).to_f}")
     end
   end
 end
