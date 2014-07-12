@@ -1,0 +1,14 @@
+[{
+  "ids": [1,2,3,6,7,8,9],
+  "facial_hair": true,
+  "glasses": false,
+  "balding": false,
+  "gender": "male"
+},
+{
+  "ids": [4,5,10],
+  "facial_hair": true,
+  "glasses": true,
+  "balding": false,
+  "gender": "male"
+}]
