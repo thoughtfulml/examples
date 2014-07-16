@@ -32,11 +32,18 @@ end
 
 uniq_styles = relevant_info.map {|k,v| v[:styles] }.flatten.uniq.sort
 
+artists = {}
+
+CSV.foreach('./jazz_albums.csv', :headers => true) do |row|
+  key = [row['Artist'], row['Album']].join(' ')
+  artists[key] = row['Artist']
+end
+
 CSV.open('./annotated_jazz_albums.csv', 'wb') do |csv|
-  csv << %w[artist_album year].concat(uniq_styles)
+  csv << %w[artist_album key_index year].concat(uniq_styles)
 
   relevant_info.each do |k,v|
     styles = uniq_styles.map {|uu| v[:styles].include?(uu) ? 1 : 0 }
-    csv << [k, v[:year]].concat(styles)
+    csv << [k, artists.keys.index(k), v[:year]].concat(styles)
   end
 end
