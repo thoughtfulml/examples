@@ -1,0 +1,5 @@
+source 'https://rubygems.org'
+
+gem 'nmatrix'
+gem 'sequel'
+gem 'postgres'
