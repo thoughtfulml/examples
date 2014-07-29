@@ -5,6 +5,8 @@ gem 'puma'
 gem 'mini_magick'
 gem 'ruby-opencv', :require => 'opencv'
 gem 'algorithms'
+gem 'rake'
+
 
 group :development do
   gem 'rerun'

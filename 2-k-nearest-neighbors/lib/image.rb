@@ -19,7 +19,7 @@ class Image
   end
 
   def self.from_base64(base64)
-    filepath = "./public/faces/#{Digest::MD5.hexdigest(base64))}.jpg"
+    filepath = "./public/faces/#{Digest::MD5.hexdigest(base64)}.jpg"
 
     write(filepath) do
       encoded_data = Base64.decode64(base64)

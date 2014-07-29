@@ -5,29 +5,21 @@ class Neighborhood
   def initialize(files)
     @ids = {}
     @files = files
-    counter = 0
-    kdtree_hash = {}
-
-    @files.each do |f|
-      desc = Face.new(f).descriptors
-      desc.each do |d|
-        @ids[counter] = f
-        kdtree_hash[counter] = d
-        counter += 1
-      end
-    end
-
-    @kd_tree = Containers::KDTree.new(kdtree_hash)
+    setup!
   end
 
   def attributes
-    dir_glob = @files.map do |file|
-      File.join(File.dirname(file), 'attributes.json')
-    end.uniq
+    if @attributes.nil?
+     attributes = {}
+      @files.each do |file|
+        att_name = File.join(File.dirname(file), 'attributes.json')
 
-    @attributes ||= Hash[Dir.glob(dir_glob).map do |att|
-      [att.split("/")[-2], JSON.parse(File.read(att))]
-    end]
+        attributes[att_name.split("/")[-2]] = JSON.parse(File.read(att_name))
+      end
+      @attributes = attributes
+    else
+      @attributes
+    end
   end
 
   def self.face_class(filename, subkeys)
@@ -37,13 +29,12 @@ class Neighborhood
     json = JSON.parse(File.read(File.join(dir, "attributes.json")))
     
     h = nil
+
     if json.is_a?(Array)
-      hash = json.find do |hh|
-        h.fetch('ids').include?(base.to_i)
-      end
-      if !hash
-        raise "Cannot find #{base.to_i} inside of #{json} for file #{filename}"
-      end
+      h = json.find do |hh|
+        hh.fetch('ids').include?(base.to_i)
+      end or
+      raise "Cannot find #{base.to_i} inside of #{json} for file #{filename}"
     else
       h = json
     end
@@ -84,5 +75,22 @@ class Neighborhood
     end
 
     ids.uniq
+  end
+
+  private
+  def setup!
+    counter = 0
+    kdtree_hash = {}
+
+    @files.each do |f|
+      desc = Face.new(f).descriptors
+      desc.each do |d|
+        @ids[counter] = f
+        kdtree_hash[counter] = d
+        counter += 1
+      end
+    end
+
+    @kd_tree = Containers::KDTree.new(kdtree_hash)
   end
 end
