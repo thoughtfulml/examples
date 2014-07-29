@@ -29,8 +29,9 @@ describe Neighborhood do
   end
 
   if ENV['OPTIMIZE_K'] == 't'
-    %w[fold1 fold2].each do |fold|
-      it "cross validates #{fold}" do
+    %w[fold1 fold2].each_with_index do |fold, i|
+      other_fold = "fold#{(i + 1) % 2 + 1}"
+      it "cross validates #{fold} against #{other_fold}" do
         k = 4
 
         (0..6).each do |k_exp|
@@ -41,7 +42,7 @@ describe Neighborhood do
           dist = measure_x_times(2) do
             file_folds.fetch(fold).each do |vf|
               face_class = Neighborhood.face_class(vf, %w[glasses facial_hair])
-              actual = neighborhoods.fetch(fold).attributes_guess(vf, k)
+              actual = neighborhoods.fetch(other_fold).attributes_guess(vf, k)
 
               face_class.each do |k,v|
                 if actual[k][v] > actual[k][!v]
@@ -73,13 +74,13 @@ describe Neighborhood do
 
     expectation = {
       'glasses' => {
-        attributes.fetch('glasses') => descriptor_count,
-        !attributes.fetch('glasses') => 0
-      },
+      attributes.fetch('glasses') => descriptor_count,
+      !attributes.fetch('glasses') => 0
+    },
       'facial_hair' => {
-        attributes.fetch('facial_hair') => descriptor_count,
-        !attributes.fetch('facial_hair') => 0
-      }
+      attributes.fetch('facial_hair') => descriptor_count,
+      !attributes.fetch('facial_hair') => 0
+    }
     }
 
     neighborhood.attributes_guess(files.first).must_equal expectation
