@@ -32,10 +32,8 @@ describe Neighborhood do
     %w[fold1 fold2].each_with_index do |fold, i|
       other_fold = "fold#{(i + 1) % 2 + 1}"
       it "cross validates #{fold} against #{other_fold}" do
-        k = 4
-
-        (0..6).each do |k_exp|
-          k = 2 ** k_exp
+        (1..7).each do |k_exp|
+          k = 2 ** k_exp - 1
           errors = 0
           successes = 0
 
