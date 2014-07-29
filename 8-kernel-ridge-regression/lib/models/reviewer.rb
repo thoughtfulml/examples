@@ -3,21 +3,21 @@ class Reviewer < Sequel::Model
   one_to_many :user_preferences
 
   IDENTITY = NMatrix[
-    *Array.new(104) { |i| 
-      Array.new(104) { |j| 
+    *Array.new(104) { |i|
+      Array.new(104) { |j|
         (i == j) ? 1.0 : 0.0
       }
     }
   ]
 
-  def preference·
+  def preference
     @max_beer_id = BeerStyle.count
     return [] if reviews.empty?
     rows = []
     overall = []
 
     context = DB.fetch(<<-SQL)
-      SELECT 
+      SELECT
         AVG(reviews.overall) AS overall
         , beers.beer_style_id AS beer_style_id
       FROM reviews
@@ -48,28 +48,28 @@ class Reviewer < Sequel::Model
     end
 
     (left * x.transpose * NMatrix[overall].transpose).to_a.flatten
-  end 
+  end
 
   def friend
     skip_these = styles_tasted - [favorite.id]
 
     someone_else = UserPreference.where(
-      'beer_style_id = ? AND beer_style_id NOT IN ? AND reviewer_id != ?', 
-      favorite.id, 
-      skip_these, 
+      'beer_style_id = ? AND beer_style_id NOT IN ? AND reviewer_id != ?',
+      favorite.id,
+      skip_these,
       self.id
     ).order(:preference).last.reviewer
   end
 
   def styles_tasted
     reviews.map { |r| r.beer.beer_style_id }.uniq
-  end··
+  end
 
   def recommend_new_style
     UserPreference.where(
-      'beer_style_id NOT IN ? AND reviewer_id = ?', 
-      styles_tasted, 
+      'beer_style_id NOT IN ? AND reviewer_id = ?',
+      styles_tasted,
       friend.id
     ).order(:preference).last.beer_style
-  end·
+  end
 end

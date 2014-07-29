@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
 
-gem 'nmatrix'
+gem 'narray'
 gem 'sequel'
-gem 'postgres'
+gem 'pg'
