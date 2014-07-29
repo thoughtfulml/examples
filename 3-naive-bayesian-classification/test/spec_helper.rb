@@ -1,6 +1,3 @@
-require 'simplecov'
-SimpleCov.command_name "MiniTest #{rand(100000)}"
-SimpleCov.start
 require 'tempfile'
 
 require 'minitest/autorun'

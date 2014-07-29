@@ -6,15 +6,16 @@ describe Tokenizer do
   describe '1-gram tokenization' do
     it 'downcases all words' do
       expectation = %w[this is all caps]
-      Tokenizer.tokenize("THIS IS ALL CAPS") do |token|
-        token.must_equal expectation.shift
+      Tokenizer.tokenize('THIS IS ALL CAPS') do |token|
+        expected_token = expectation.shift
+
+        token.must_equal expected_token
       end
     end
 
-    it 'uses the block if given' do
-      expectation = %w[feep foop]
-      Tokenizer.tokenize("feep foop") do |token|
-        token.must_equal expectation.shift
+    it 'tokenizes a wone word sentence' do
+      Tokenizer.tokenize('quick') do |token|
+        token.must_equal 'quick'
       end
     end
   end

@@ -71,6 +71,7 @@ describe SpamTrainer do
 
   describe 'entropy' do
     it 'calculates entropy' do
+      skip
       # Entropy is the sum of probabilities
       # times the log2 of itself
       entropy = 0.0
@@ -91,6 +92,7 @@ describe SpamTrainer do
 
     describe 'perplexity' do
       it 'calculates perplexity as 2 ** -entropy' do
+        skip
         trainer.perplexity.wont_equal 0.0
         trainer.perplexity.must_equal (2 ** (-trainer.entropy))
       end
