@@ -30,7 +30,10 @@ describe Corpus do
   end
 
   it 'consumes a positive training set and unique set of words' do
-    positive = write_training_file('I loved that so much!!! I loved it', 'positive')
+    positive = write_training_file(
+      'I loved that so much!!! I loved it', 
+      'positive'
+    )
     corpus = Corpus.new(positive.path, :positive)
     corpus.words.must_equal Set.new(%w[loved])
   end

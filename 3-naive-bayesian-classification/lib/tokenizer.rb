@@ -1,7 +1,12 @@
 # encoding: utf-8
 module Tokenizer
   extend self
-  ALPHABET = (('a'..'z').to_a + ('A'..'Z').to_a + (0..9).to_a + %w[_ \u0000]).join
+  ALPHABET = (
+    ('a'..'z').to_a + 
+    ('A'..'Z').to_a + 
+    (0..9).to_a + 
+    %w[_ \u0000]
+  ).join
 
   def tokenize(string, &block)
     current_word = ''

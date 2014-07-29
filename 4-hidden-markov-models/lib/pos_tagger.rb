@@ -56,8 +56,9 @@ class POSTagger
   end
 
   def probability_of_word_tag(word_sequence, tag_sequence)
-    raise 'The word and tags must be the same length!' if word_sequence.length != tag_sequence.length
-
+    if word_sequence.length != tag_sequence.length
+      raise 'The word and tags must be the same length!' 
+    end
     # word_sequence %w[START I want to race .]
     # Tag sequence %w[START PRO V TO V .]
 
@@ -66,7 +67,10 @@ class POSTagger
     probability = Rational(1,1)
 
     (1...length).each do |i|
-      probability *= tag_probability(tag_sequence[i - 1], tag_sequence[i]) * word_tag_probability(word_sequence[i], tag_sequence[i])
+      probability *= (
+        tag_probability(tag_sequence[i - 1], tag_sequence[i]) * 
+        word_tag_probability(word_sequence[i], tag_sequence[i])
+      )
     end
 
     probability
@@ -99,14 +103,21 @@ class POSTagger
       if tag == 'START'
         next
       else
-        probability =  tag_probability("START", tag) * word_tag_probability(parts.first, tag)
+        probability = (
+          tag_probability("START", tag) * 
+          word_tag_probability(parts.first, tag)
+        )
+
         if probability > 0
           last_viterbi[tag] = probability
         end
       end
     end
 
-    backpointers << (last_viterbi.max_by{|k,v| v} || @tag_frequencies.max_by{|k,v| v}).first
+    backpointers << (
+      last_viterbi.max_by {|k,v| v} || 
+      @tag_frequencies.max_by {|k,v| v}
+    ).first
 
     parts[1..-1].each do |part|
       viterbi = {}
@@ -115,12 +126,20 @@ class POSTagger
         break if last_viterbi.empty?
 
         best_previous = last_viterbi.max_by do |prev_tag, probability|
-          probability * tag_probability(prev_tag, tag) * word_tag_probability(part, tag)
+          (
+            probability * 
+            tag_probability(prev_tag, tag) * 
+            word_tag_probability(part, tag)
+          )
         end
 
         best_tag = best_previous.first
 
-        probability = last_viterbi[best_tag] * tag_probability(best_tag, tag) * word_tag_probability(part, tag)
+        probability = (
+          last_viterbi[best_tag] * 
+          tag_probability(best_tag, tag) * 
+          word_tag_probability(part, tag)
+        )
 
         if probability > 0
           viterbi[tag] = probability
@@ -130,7 +149,10 @@ class POSTagger
 
       last_viterbi = viterbi
       
-      backpointers << (last_viterbi.max_by{|k,v| v} || @tag_frequencies.max_by{|k,v| v }).first
+      backpointers << (
+        last_viterbi.max_by{|k,v| v} || 
+        @tag_frequencies.max_by{|k,v| v }
+      ).first
     end
     backpointers
   end

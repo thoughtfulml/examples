@@ -1,16 +1,22 @@
 require 'minitest/autorun'
-require File.expand_path(File.join(File.dirname(__FILE__), '../lib/network.rb'))
-require File.expand_path(File.join(File.dirname(__FILE__), '../lib/language.rb'))
+require File.expand_path('../../lib/network.rb', __FILE__)
+require File.expand_path('../../lib/language.rb', __FILE__)
 
 puts "Bootstrapping Neural Network"
 @languages = []
 @cross_validation_languages = []
 
-Dir[File.expand_path(File.join(File.dirname(__FILE__), './data/*.txt'))].each do |txt|
+Dir[File.expand_path('../data/*.txt', __FILE__)].each do |txt|
   if txt =~ /_1\.txt/
-    @cross_validation_languages << Language.new(txt, File.basename(txt, '.txt').split("_").first)
+    @cross_validation_languages << Language.new(
+      txt, 
+      File.basename(txt, '.txt').split("_").first
+    )
   else
-    @languages << Language.new(txt, File.basename(txt, '.txt').split("_").first)
+    @languages << Language.new(
+      txt, 
+      File.basename(txt, '.txt').split("_").firsti
+    )
   end
 end
 
@@ -21,19 +27,27 @@ ACTS_VERSES.train!
 
 describe Network do
   def compare(network, text_file)
-    misses = 0
-    hits = 0
+    misses = 0.0
+    hits = 0.0
 
     file = File.read(text_file)
     file.split(/[\.!\?]/).each do |sentence|
-      if network.run(sentence).name == File.basename(text_file, '.txt').split("_").first
+      sentence_name = network.run(sentence).name
+
+      expected = File.basename(text_file, '.txt').split('_').first
+      if sentence_name = expected 
         hits += 1
       else
         misses += 1
       end
     end
 
-    assert misses < (0.05 * (misses + hits)), "#{text_file} has failed with a miss rate of #{misses.to_f / (misses + hits)}"
+    total = misses + hits
+
+    assert(
+      misses < (0.05 * total), 
+      "#{text_file} has failed with a miss rate of #{misses / total}"
+    )
   end
 
   def language_test(language)

@@ -1,7 +1,7 @@
 # encoding: utf-8
 require 'minitest/autorun'
 require 'tempfile'
-require File.expand_path(File.join(File.dirname(__FILE__), '../lib/language.rb'))
+require File.expand_path('../../lib/language.rb', __FILE__)
 
 describe Language do
   before do
@@ -30,7 +30,7 @@ describe Language do
     @language.vectors.first.keys.must_equal ('a'..'z').to_a
     @language.vectors[1].keys.must_equal ('a'..'z').to_a
 
-    special_chars = "ïëéüòèöäößüøæååØóąłżżśęńśćźŁ".split(//).uniq.sort
+    special_chars = "ïëéüòèöäößüøæååØóąłżżśęńśćź".split(//).uniq.sort
 
     @language.vectors.last.keys.sort.must_equal special_chars
   end

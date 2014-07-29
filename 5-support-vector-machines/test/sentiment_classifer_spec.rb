@@ -21,7 +21,7 @@ describe SentimentClassifier do
     Rational(misses, total)
   end
 
-  it 'builds using automagic defaults .neg for negative and .pos for positive' do
+  it 'builds using automagic defaults .neg and .pos' do
     neg = write_training_file("This is very negative", ['negative', '.neg'])
     pos = write_training_file("This is very positive", ['positive', '.pos'])
     # SentimentClassifier.send(:include, ::MiniTest::Expectations)
@@ -50,7 +50,10 @@ describe SentimentClassifier do
 
     n_er = validate(classifier, neg.fetch(:validation), :negative)
     p_er = validate(classifier, pos.fetch(:validation), :positive)
-    total = Rational(n_er.numerator + p_er.numerator, n_er.denominator + p_er.denominator)
+    total = Rational(
+      n_er.numerator + p_er.numerator, 
+      n_er.denominator + p_er.denominator
+    )
 
     total.must_be :<, 0.35
   end
@@ -64,10 +67,22 @@ describe SentimentClassifier do
     c = 2 ** 7
     classifier.c = c
 
-    n_er = validate(classifier, "./config/rt-polaritydata/rt-polarity.neg", :negative)
-    p_er = validate(classifier, "./config/rt-polaritydata/rt-polarity.pos", :positive)
+    n_er = validate(
+      classifier, 
+      "./config/rt-polaritydata/rt-polarity.neg", 
+      :negative
+    )
 
-    total = Rational(n_er.numerator + p_er.numerator, n_er.denominator + p_er.denominator)
+    p_er = validate(
+      classifier, 
+      "./config/rt-polaritydata/rt-polarity.pos", 
+      :positive
+    )
+
+    total = Rational(
+      n_er.numerator + p_er.numerator, 
+      n_er.denominator + p_er.denominator
+    )
 
     total.must_equal 0.0
   end

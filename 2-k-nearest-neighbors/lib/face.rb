@@ -17,7 +17,8 @@ class Face
   end
 
   def annotated_image_path
-    outpath = File.join(File.dirname(@filepath), 'extracted_' + File.basename(@filepath))
+    dir = File.dirname(@filepath)
+    outpath = File.join(dir, 'extracted_' + File.basename(@filepath))
 
     Image.write(outpath) do
       rgb = CvMat.load(@filepath, CV_LOAD_IMAGE_COLOR)

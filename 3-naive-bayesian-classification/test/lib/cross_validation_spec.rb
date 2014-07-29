@@ -49,17 +49,24 @@ if ENV['CROSS_VALIDATE'] == 't'
         end
       end
 
+      total = false_positives + false_negatives + correct
+
       message = <<-EOL
-      False Positive Rate (Bad): #{false_positives / (false_positives + false_negatives + correct)}
-      False Negative Rate (not so bad): #{false_negatives / (false_positives + false_negatives + correct)}
-      Error Rate: #{(false_positives + false_negatives) / (false_positives + false_negatives + correct)}
+      False Positives: #{false_positives / total}
+      False Negatives: #{false_negatives / total}
+      Accuracy: #{(false_positives + false_negatives) / total}
       EOL
       message
     end
 
     describe "Fold1 unigram model" do
-      let(:trainer) { self.class.label_to_training_data('./test/fixtures/fold1.label') }
-      let(:emails) { self.class.parse_emails('./test/fixtures/fold2.label') }
+      let(:trainer) { 
+        self.class.label_to_training_data('./test/fixtures/fold1.label') 
+      }
+
+      let(:emails) { 
+        self.class.parse_emails('./test/fixtures/fold2.label') 
+      }
 
       it "validates fold1 against fold2 with a unigram model" do
         skip(self.class.validate(trainer, emails))
@@ -67,8 +74,13 @@ if ENV['CROSS_VALIDATE'] == 't'
     end
 
     describe "Fold2 unigram model" do
-      let(:trainer) { self.class.label_to_training_data('./test/fixtures/fold2.label') }
-      let(:emails) { self.class.parse_emails('./test/fixtures/fold1.label') }
+      let(:trainer) { 
+        self.class.label_to_training_data('./test/fixtures/fold2.label') 
+      }
+
+      let(:emails) { 
+        self.class.parse_emails('./test/fixtures/fold1.label') 
+      }
 
       it "validates fold2 against fold1 with a unigram model" do
         skip(self.class.validate(trainer, emails))

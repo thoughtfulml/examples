@@ -24,7 +24,10 @@ class Email
   end
 
   def blob
-    "#{body.to_s.force_encoding('UTF-8')}\n#{subject.to_s.force_encoding('UTF-8')}"
+    [
+      body.to_s.force_encoding('UTF-8'),
+      subject.to_s.force_encoding('UTF-8')
+    ].join("\n")
   end
 
   private
@@ -46,7 +49,10 @@ class Email
   def multipart_body
     buffer = ''
     @mail.parts.each do |part|
-      buffer += single_body(part.body.decoded, simplify(part.content_type)).force_encoding('UTF-8')
+      buffer += single_body(
+        part.body.decoded, 
+        simplify(part.content_type)
+      ).force_encoding('UTF-8')
     end
     buffer
   end

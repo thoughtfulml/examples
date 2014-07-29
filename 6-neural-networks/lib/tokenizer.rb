@@ -6,7 +6,10 @@ module Tokenizer
   STOP_CHARACTERS = ['.', '?', '!']
 
   def tokenize(blob)
-    raise 'Must implement each_char on blob' unless blob.respond_to?(:each_char)
+    unless blob.respond_to?(:each_char)
+      raise 'Must implement each_char on blob' 
+    end
+
     vectors = []
     dist = Hash.new(0)
 
@@ -18,7 +21,7 @@ module Tokenizer
       elsif SPACES.include?(char) || PUNCTUATION.include?(char)
 
       else
-        character = char.downcase.tr("ÅÄÜÖËÏŚŻ", "åäüöëïśź")
+        character = char.downcase.tr("ÅÄÜÖËÏŚŻŁ", "åäüöëïśźł")
         characters << character
         dist[character] += 1
       end

@@ -61,8 +61,10 @@ describe POSTagger do
         tagger.word_tag_probability("A", "D"),
         tagger.word_tag_probability("A", "B"), # 1
       ].reduce(&:*)
+      
+      expected = word_probabilities * tag_probabilities
 
-      pos_tagger.probability_of_word_tag(words, tags).must_equal (word_probabilities * tag_probabilities)
+      pos_tagger.probability_of_word_tag(words, tags).must_equal expected
     end
 
     # Maximum Liklihood estimate

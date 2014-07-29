@@ -40,14 +40,16 @@ describe SpamTrainer do
     let(:email) { Email.new('./test/fixtures/plain.eml') }
 
     it 'sets the preference based on how many times a category shows up' do
-      trainer.preference.must_equal trainer.categories.sort_by {|cat| trainer.total_for(cat) }
+      expected = trainer.categories.sort_by {|cat| trainer.total_for(cat) }
+
+      trainer.preference.must_equal expected
     end
 
-    it 'always passes in an object that has blob defined on it otherwise error' do
+    it 'always passes in an object that has blob defined on it' do
       -> {trainer.score(Struct)}.must_raise RuntimeError
     end
 
-    it 'calculates the probability to be exactly 1/n of the categories for itself' do
+    it 'calculates the probability to be 1/n' do
       trainer.score(email).values.uniq.length.must_equal 1
     end
 
@@ -59,8 +61,11 @@ describe SpamTrainer do
     it 'gives preference to whatever has the most in it' do
       score = trainer.score(email)
       preference = trainer.preference.last
+      preference_score = score.fetch(preference)
 
-      trainer.classify(email).must_equal SpamTrainer::Classification.new(preference, score.fetch(preference))
+      expected = SpamTrainer::Classification.new(preference, preference_score)
+
+      trainer.classify(email).must_equal expected
     end
   end
 

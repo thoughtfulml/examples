@@ -28,14 +28,19 @@ describe Reviewer do
       reviews[r.beer.beer_style_id] <<  r.overall
     end·
 
-    review_ratings = Hash[reviews.map {|k,v| [k, v.inject(&:+) / v.length.to_f] }]
+    review_ratings = Hash[reviews.map {|k,v| 
+      [k, v.inject(&:+) / v.length.to_f] 
+    }]
 
     assert review_ratings.fetch(most_liked) > review_ratings.fetch(least_liked)
 
     best_fit = review_ratings.max_by(&:last)
     worst_fit = review_ratings.min_by(&:last)
 
-    assert best_fit.first == most_liked || best_fit.last == review_ratings[most_liked]
-    assert worst_fit.first == least_liked || worst_fit.last == review_ratings[least_liked]
+    most_liked = review_ratings[most_liked]
+    least_liked = review_ratings[least_liked]
+
+    assert best_fit.first == most_liked || best_fit.last == most_liked
+    assert worst_fit.first == least_liked || worst_fit.last == least_liked 
   end
 end

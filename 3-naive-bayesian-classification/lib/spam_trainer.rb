@@ -36,12 +36,17 @@ class SpamTrainer
   def score(email)
     train!
 
-    raise 'Must implement #blob on given object' unless email.respond_to?(:blob)
+    unless email.respond_to?(:blob)
+      raise 'Must implement #blob on given object'
+    end
 
     cat_totals = totals
 
     aggregates = Hash[categories.map do |cat|
-      [cat, Rational(cat_totals.fetch(cat).to_i, cat_totals.fetch("_all").to_i)]
+      [
+        cat, 
+        Rational(cat_totals.fetch(cat).to_i, cat_totals.fetch("_all").to_i)
+      ]
     end]
 
     Tokenizer.unique_tokenizer(email.blob) do |token|

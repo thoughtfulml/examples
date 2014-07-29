@@ -2,7 +2,13 @@ class Reviewer < Sequel::Model
   one_to_many :reviews
   one_to_many :user_preferences
 
-  IDENTITY = NMatrix[*Array.new(104) {|i| Array.new(104) {|j| (i == j) ? 1.0 : 0.0}}]
+  IDENTITY = NMatrix[
+    *Array.new(104) { |i| 
+      Array.new(104) { |j| 
+        (i == j) ? 1.0 : 0.0
+      }
+    }
+  ]
 
   def preference·
     @max_beer_id = BeerStyle.count
@@ -11,11 +17,13 @@ class Reviewer < Sequel::Model
     overall = []
 
     context = DB.fetch(<<-SQL)
-        SELECT avg(reviews.overall) AS overall, beers.beer_style_id AS beer_style_id
-        FROM reviews
-        JOIN beers ON beers.id = reviews.beer_id
-        WHERE reviewer_id = #{self.id}
-        GROUP BY beer_style_id;
+      SELECT 
+        AVG(reviews.overall) AS overall
+        , beers.beer_style_id AS beer_style_id
+      FROM reviews
+      JOIN beers ON beers.id = reviews.beer_id
+      WHERE reviewer_id = #{self.id}
+      GROUP BY beer_style_id;
     SQL
 
     context.each do |review|
@@ -45,9 +53,12 @@ class Reviewer < Sequel::Model
   def friend
     skip_these = styles_tasted - [favorite.id]
 
-    someone_else = UserPreference.where('beer_style_id = ? AND beer_style_id NOT IN ? AND reviewer_id != ?', favorite.id, skip_these, self.id).
-      order(:preference).
-      last.reviewer
+    someone_else = UserPreference.where(
+      'beer_style_id = ? AND beer_style_id NOT IN ? AND reviewer_id != ?', 
+      favorite.id, 
+      skip_these, 
+      self.id
+    ).order(:preference).last.reviewer
   end
 
   def styles_tasted
@@ -55,6 +66,10 @@ class Reviewer < Sequel::Model
   end··
 
   def recommend_new_style
-    UserPreference.where('beer_style_id NOT IN ? AND reviewer_id = ?', styles_tasted, friend.id).order(:preference).last.beer_style
+    UserPreference.where(
+      'beer_style_id NOT IN ? AND reviewer_id = ?', 
+      styles_tasted, 
+      friend.id
+    ).order(:preference).last.beer_style
   end·
 end

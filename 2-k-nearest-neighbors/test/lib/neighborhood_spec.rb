@@ -55,7 +55,9 @@ describe Neighborhood do
 
           error_rate = errors / (errors + successes).to_f
 
-          avg_time = dist.reduce(Rational(0,1)) {|sum, bm| sum += bm.real * Rational(1,2) }
+          avg_time = dist.reduce(Rational(0,1)) do |sum, bm| 
+            sum += bm.real * Rational(1,2)
+          end
           print "#{k}, #{error_rate}, #{avg_time}\n"
         end
       end
@@ -88,7 +90,9 @@ describe Neighborhood do
 
     n = Neighborhood.new(files)
 
-    expected = {'fixtures' => JSON.parse(File.read('./test/fixtures/attributes.json'))}
+    expected = {
+      'fixtures' => JSON.parse(File.read('./test/fixtures/attributes.json'))
+    }
 
     n.attributes.must_equal expected
   end
@@ -108,7 +112,8 @@ describe Neighborhood do
 
     expectation = {'glasses' => false, 'facial_hair' => false}
 
-    Neighborhood.face_class(file, %w[glasses facial_hair]).must_equal expectation
+    attributes = %w[glasses facial_hair]
+    Neighborhood.face_class(file, attributes).must_equal expectation
   end
 
   it 'returns the proper face class when there is multiples' do

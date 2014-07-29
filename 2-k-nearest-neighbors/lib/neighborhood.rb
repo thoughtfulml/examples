@@ -33,17 +33,22 @@ class Neighborhood
   def self.face_class(filename, subkeys)
     dir = File.dirname(filename)
     base = File.basename(filename, '.png')
+    
     json = JSON.parse(File.read(File.join(dir, "attributes.json")))
-    @h = nil
+    
+    h = nil
     if json.is_a?(Array)
-      @h = json.find do |hh|
-        hh.fetch('ids').include?(base.to_i)
-      end or raise "Cannot find #{base.to_i} inside of #{json} for file #{filename}"
+      hash = json.find do |hh|
+        h.fetch('ids').include?(base.to_i)
+      end
+      if !hash
+        raise "Cannot find #{base.to_i} inside of #{json} for file #{filename}"
+      end
     else
-      @h = json
+      h = json
     end
 
-    @h.select {|k,v| subkeys.include?(k) }
+    h.select {|k,v| subkeys.include?(k) }
   end
 
   def attributes_guess(file, k = K)

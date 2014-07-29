@@ -75,10 +75,28 @@ DB.run <<-SQL
 SQL
 
 DB.run <<-SQL
-  INSERT INTO reviews (reviewer_id, beer_id, overall, aroma, appearance, palate, taste)
-  SELECT r.id, b.id, review_overall, review_aroma, review_appearance, review_palate, review_taste
+  INSERT INTO reviews (
+    reviewer_id
+    , beer_id
+    , overall
+    , aroma
+    , appearance
+    , palate
+    , taste
+  )
+  SELECT 
+    r.id
+    , b.id
+    , review_overall
+    , review_aroma
+    , review_appearance
+    , review_palate
+    , review_taste
   FROM beer_reviews br
-  JOIN beers b ON b.name = br.beer_name AND b.abv = br.beer_abv AND b.style = br.beer_style
+  JOIN beers b ON 
+    b.name = br.beer_name AND 
+    b.abv = br.beer_abv AND 
+    b.style = br.beer_style
   JOIN reviewers r ON r.name = br.review_profilename;
 SQL
 

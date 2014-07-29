@@ -3,3 +3,4 @@ coverage/*
 *.swp
 *.swn
 *.swo
+scripts/*

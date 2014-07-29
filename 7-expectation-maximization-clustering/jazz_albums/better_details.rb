@@ -3,7 +3,13 @@ require 'json'
 require 'csv'
 
 def more_info(artist, album)
-  discogs = "http://api.discogs.com/database/search?q=#{artist} #{album}&type=master&per_page=1"
+  discogs = [
+    'http://api.discogs.com/database/search',
+    URI.encode_www_form({
+      q: "#{artist} #{album}",
+      type: "master&per_page=1"
+    })
+  ].join('?')
   JSON.parse(RestClient.get(URI.escape(discogs)))
 rescue => ex
   puts ex.message

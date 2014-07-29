@@ -3,9 +3,9 @@ class CorpusSet
 
   attr_reader :words
 
-  def initialize(corpuses)
-    @corpuses = corpuses
-    @words = corpuses.reduce(Set.new) do |set, corpus|
+  def initialize(corpora)
+    @corpora = corpora
+    @words = corpora.reduce(Set.new) do |set, corpus|
       set.merge(corpus.words)
     end.to_a
   end
@@ -29,7 +29,7 @@ class CorpusSet
     return if @state == :calculated
     @yes = []
     @xes = []
-    @corpuses.each do |corpus|
+    @corpora.each do |corpus|
       vectors = load_corpus(corpus)
       @xes.concat(vectors)
       @yes.concat([corpus.sentiment_code] * vectors.length)
