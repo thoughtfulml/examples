@@ -1,4 +1,5 @@
 require_relative '../spec_helper'
+require 'matrix'
 
 describe Face do
   let(:avatar_path) { './test/fixtures/avatar.jpg' }
@@ -13,10 +14,16 @@ describe Face do
   end
 
   it 'has the same descriptors for the exact same face' do
-    @face = Face.new(avatar_path)
-    @face2 = Face.new(avatar_path)
+    @face_descriptors = Face.new(avatar_path).descriptors
+    @face2_descriptors = Face.new(avatar_path).descriptors
 
-    @face.descriptors.must_equal @face2.descriptors
+    @face_descriptors.sort_by! { |row| Vector[*row].magnitude }
+    @face2_descriptors.sort_by! { |row| Vector[*row].magnitude }
+
+    @face_descriptors.zip(@face2_descriptors).each do |f1, f2|
+      assert (0.99..1.01).include?(cosine_similarity(f1, f2)),
+        "Face descriptors don't match"
+    end
   end
 
   it 'has the same keypoints for the exact same face' do
@@ -26,8 +33,11 @@ describe Face do
     # This is purely because Ruby's implementation of OpenCV doesn't
     # Have a representation of == for SurfPoints :(
     @face.keypoints.each_with_index do |kp, i|
-      kp.pt.x.must_equal @face2.keypoints[i].pt.x
-      kp.pt.y.must_equal @face2.keypoints[i].pt.y
+      f1 = Vector[kp.pt.x, kp.pt.y]
+      f2 = Vector[@face2.keypoints[i].pt.x, @face2.keypoints[i].pt.y]
+
+      assert (0.99..1.01).include?(cosine_similarity(f1,f2)),
+        "Face keypoints do not match"
     end
   end
 end
