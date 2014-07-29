@@ -1,26 +1,13 @@
 # encoding: utf-8
 module Tokenizer
   extend self
-  ALPHABET = (
-    ('a'..'z').to_a + 
-    ('A'..'Z').to_a + 
-    (0..9).to_a + 
-    %w[_ \u0000]
-  ).join
 
   def tokenize(string, &block)
     current_word = ''
-    return unless string.respond_to?(:each_char)
-    string.each_char do |char|
-      if ALPHABET.include?(char)
-        current_word += char
-      elsif !current_word.empty?
-        yield(current_word.downcase)
-        current_word = ''
-      end
+    return unless string.respond_to?(:scan)
+    string.scan(/[a-zA-Z0-9_\u0000]+/).each do |token|
+      yield token.downcase
     end
-
-    yield(current_word.downcase) unless current_word.empty?
   end
 
   def ngram(string, n = 1, &block)
