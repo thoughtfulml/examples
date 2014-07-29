@@ -50,7 +50,13 @@ describe SpamTrainer do
     end
 
     it 'calculates the probability to be 1/n' do
-      trainer.score(email).values.uniq.length.must_equal 1
+      scores = trainer.score(email).values
+
+      assert_in_delta scores.first, scores.last
+
+      scores.each_slice(2) do |slice|
+        assert_in_delta slice.first, slice.last
+      end
     end
 
     it 'calculates the probability to be exactly the same and add up to 1' do
