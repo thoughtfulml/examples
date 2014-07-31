@@ -3,9 +3,9 @@ Bundler.require
 
 DB = Sequel.connect('postgres://localhost/beer_reviews')
 
-require 'models/user_preference'
-require 'models/reviewer'
-require 'models/brewery'
-require 'models/beer'
-require 'models/beer_style'
-require 'models/review'
+autoload :UserPreference, 'models/user_preference'
+autoload :Reviewer, 'models/reviewer'
+autoload :Brewery, 'models/brewery'
+autoload :Beer, 'models/beer'
+autoload :BeerStyle, 'models/beer_style'
+autoload :Review, 'models/review'

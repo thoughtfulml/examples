@@ -1,19 +1,12 @@
 require 'spec_helper'
-require 'tempfile'
+require 'stringio'
 
 describe POSTagger do
-  def training_file(training)
-    t = Tempfile.new('training')
-    t.write(training)
-    t.close
-    t.path
-  end
-
   describe 'viterbi' do
     let(:training) { "I/PRO want/V to/TO race/V ./. I/PRO like/V cats/N ./." }
     let(:sentence) { 'I want to race.' }
     let(:pos_tagger) {
-      pos_tagger = POSTagger.new([training_file(training)])
+      pos_tagger = POSTagger.new([StringIO.new(training)])
       pos_tagger.train!
       pos_tagger
     }
@@ -27,7 +20,7 @@ describe POSTagger do
     let(:stream) { "A/B C/D C/D A/D A/B ./." }
 
     let(:pos_tagger) {
-      pos_tagger = POSTagger.new([training_file(stream)])
+      pos_tagger = POSTagger.new([StringIO.new(stream)])
       pos_tagger.train!
       pos_tagger
     }

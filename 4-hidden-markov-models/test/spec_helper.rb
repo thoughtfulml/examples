@@ -1,8 +1,3 @@
-require 'simplecov'
-require 'redis'
-SimpleCov.command_name "MiniTest #{rand(100000)}"
-SimpleCov.start
-
 require 'minitest/autorun'
 require 'minitest/pride'
 

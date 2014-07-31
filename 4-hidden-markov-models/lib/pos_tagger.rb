@@ -2,9 +2,28 @@ require 'set'
 require 'benchmark'
 
 class POSTagger
-  def initialize(files_to_parse =  [], eager = false)
+  class LazyFile
+    def initialize(filename)
+      @filename = filename  
+    end
+
+    def each_line(&block)
+      f = File.open(@filename, 'r')
+      begin
+        f.each_line(&block)
+      ensure
+        f.close
+      end
+    end  
+  end
+
+  def self.from_filepaths(filenames, eager = false)
+    new(filenames.map {|a| LazyFile.new(a) }, eager)
+  end
+
+  def initialize(data_io = [], eager = false)
     @corpus_parser = CorpusParser.new
-    @data_files = files_to_parse
+    @data_io = data_io
 
     if eager
       train!
@@ -20,8 +39,8 @@ class POSTagger
       @tag_frequencies = Hash.new(0)
       @word_tag_combos = Hash.new(0)
 
-      @data_files.each do |df|
-        File.foreach(df) do |line|
+      @data_io.each do |io|
+        io.each_line do |line|
           @corpus_parser.parse(line) do |ngram|
             write(ngram)
           end

@@ -8,14 +8,14 @@ class CorpusParser
     @ngram = 2
   end
 
-  def parse(string)
+  def parse(io)
     ngrams = @ngram.times.map { TagWord.new(NULL_CHARACTER, NULL_CHARACTER) }
 
     word = ''
     pos = ''
     parse_word = true
 
-    string.each_char do |char|
+    io.each_char do |char|
       if char == "\t" || (word.empty? && STOP.include?(char))
         next
       elsif char == SPLITTER

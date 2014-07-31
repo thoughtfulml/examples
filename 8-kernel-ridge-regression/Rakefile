@@ -5,3 +5,10 @@ task :console do
   ARGV.clear
   IRB.start
 end
+
+namespace :db do
+  desc 'creates the database that is needed'
+  task :create do
+    system('createdb beer_reviews')
+  end
+end

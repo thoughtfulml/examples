@@ -50,21 +50,36 @@ if !File.exists?('./beer_reviews/beer_reviews.csv')
 end
 
 CSV.foreach('./beer_reviews/beer_reviews.csv', :headers => true) do |line|
-  if !breweries.has_key?(line[:brewery_name])
-    b = Brewery.create(:name => line[:brewery_name])
-    breweries[line[:brewery_name]] = b.id
+  puts line
+  if !breweries.has_key?(line.fetch('brewery_name'))
+    b = Brewery.create(:name => line.fetch('brewery_name'))
+    breweries[line.fetch('brewery_name')] = b.id
   end
 
-  if !reviewers.has_key?(line[:review_profilename])
-    r = Reviewer.create(:name => line[:review_profilename])
-    reviewers[line[:review_profilename]] = r.id
+  if !reviewers.has_key?(line.fetch('review_profilename'))
+    r = Reviewer.create(:name => line.fetch('review_profilename'))
+    reviewers[line.fetch('review_profilename')] = r.id
   end
 
-  if !beer_styles.has_key?(line[:beer_style])
-    bs = BeerStyle.create(:style => line[:beer_style])
-    beer_styles[line[:beer_style]] = bs.id
+  if !beer_styles.has_key?(line.fetch('beer_style'))
+    bs = BeerStyle.create(:name => line.fetch('beer_style'))
+    beer_styles[line.fetch('beer_style')] = bs.id
   end
 
-  beer = Beer.create(:beer_style_id => beer_styles[line[:beer_style]], :name => line[:beer_name], :style => line[:beer_style], :abv => line[:beer_abv], :brewery_id => breweries.fetch(line.fetch(:brewery_name)))
-  Review.create(:reviewer_id => reviewers.fetch(line.fetch(:reviewer_profilename)), :beer_id => beer.id, :overall => line[:review_overall], :aroma => line[:review_aroma], :appearance => line[:review_appearance], :palate => line[:review_palate], :taste => line[:review_taste])
+  beer = Beer.create({
+    :beer_style_id => beer_styles.fetch(line.fetch('beer_style')), 
+    :name => line.fetch('beer_name'), 
+    :abv => line.fetch('beer_abv'), 
+    :brewery_id => breweries.fetch(line.fetch('brewery_name'))
+  })
+
+  Review.create({
+    :reviewer_id => reviewers.fetch(line.fetch('review_profilename')), 
+    :beer_id => beer.id, 
+    :overall => line.fetch('review_overall'), 
+    :aroma => line.fetch('review_aroma'), 
+    :appearance => line.fetch('review_appearance'), 
+    :palate => line.fetch('review_palate'), 
+    :taste => line.fetch('review_taste')
+  })
 end
