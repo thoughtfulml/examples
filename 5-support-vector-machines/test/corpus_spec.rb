@@ -1,12 +1,13 @@
 require_relative './spec_helper'
 
 describe Corpus do
-  include TestMacros
+  let(:negative) { StringIO.new('I hated that so much') }
+  let(:negative_corpus) { Corpus.new(negative, :negative) }
+  let(:positive) { StringIO.new('I loved that movie so much!! I loved it') }
+  let(:positive_corpus) { Corpus.new(positive, :positive) }
 
   it 'consumes multiple files and turns it into sparse vectors' do
-    negative = write_training_file("I hated that so much", 'negative')
-    corpus = Corpus.new(negative.path, :negative)
-    corpus.sentiment.must_equal :negative
+    negative_corpus.sentiment.must_equal :negative
   end
 
   describe "tokenize" do
@@ -24,25 +25,18 @@ describe Corpus do
   end
 
   it 'consumes a positive training set' do
-    positive = write_training_file("I loved that movie so much", 'positive')
-    corpus = Corpus.new(positive.path, :positive)
-    corpus.sentiment.must_equal :positive
+    positive_corpus.sentiment.must_equal :positive
   end
 
   it 'consumes a positive training set and unique set of words' do
-    positive = write_training_file(
-      'I loved that so much!!! I loved it', 
-      'positive'
-    )
-    corpus = Corpus.new(positive.path, :positive)
-    corpus.words.must_equal Set.new(%w[loved])
+    positive_corpus.words.must_equal Set.new(%w[loved movie])
   end
 
   it 'defines a sentiment_code of 1 for positive' do
-    Corpus.new('/dev/null', :positive).sentiment_code.must_equal 1
+    Corpus.new(StringIO.new(''), :positive).sentiment_code.must_equal 1
   end
 
   it 'defines a sentiment_code of 1 for positive' do
-    Corpus.new('/dev/null', :negative).sentiment_code.must_equal -1
+    Corpus.new(StringIO.new(''), :negative).sentiment_code.must_equal -1
   end
 end

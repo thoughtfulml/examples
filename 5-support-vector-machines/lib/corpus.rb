@@ -10,15 +10,16 @@ class Corpus
 
   attr_reader :sentiment
 
-  def initialize(file, sentiment)
-    @file = file
+  def initialize(io, sentiment)
+    @io = io
     @sentiment = sentiment
   end
 
   def sentences(&block)
-    File.open(@file, 'rb').each_line do |line|
+    @io.each_line do |line|
       yield line
     end
+    @io.rewind
   end
 
   def sentiment_code
@@ -37,11 +38,12 @@ class Corpus
   def words
     @words ||= begin
       set = Set.new
-      File.open(@file, 'rb').each_line do |line|
+      @io.each_line do |line|
         Corpus.tokenize(line).each do |word|
           set << word
         end
       end
+      @io.rewind
       set
     end
   end

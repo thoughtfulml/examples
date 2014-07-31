@@ -1,6 +1,6 @@
 #encoding: utf-8
 require 'set'
-require File.expand_path(File.join(File.dirname(__FILE__), './tokenizer.rb'))
+require File.expand_path('../tokenizer.rb', __FILE__)
 class Language
   attr_reader :name, :characters, :vectors
   def initialize(text_file, name)

@@ -10,10 +10,10 @@ class Image
     @face_found = false
   end
 
-  def self.write(filepath, &block)
+  def self.write(filepath)
     if File.exists?(filepath)
     else
-      block.call
+      yield
     end
     filepath
   end
@@ -37,14 +37,16 @@ class Image
   end
 
   def to_face
-    outfile = "./public/faces/avatar_#{File.basename(@filepath)}"
+    name = File.basename(@filepath)
+    outfile = File.expand_path("../../public/faces/avatar_#{name}", __FILE__)
+
     self.class.write(outfile) do
       image = MiniMagick::Image.open(@filepath)
       image.crop(crop_params)
       image.write(outfile)
     end
 
-    Face.new("./public/faces/" + File.basename(outfile))
+    Face.new(outfile)
   end
 
   def x_size

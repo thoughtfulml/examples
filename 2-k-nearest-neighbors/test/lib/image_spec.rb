@@ -11,7 +11,7 @@ describe Image do
     assert avatar1.duplicate?(avatar2)
   end
 
-  it 'loads a file from bas64' do
+  it 'loads a file from base64' do
     file = File.read("./test/fixtures/raw.jpg")
     expected_md5 = Digest::MD5.hexdigest(file)
     base64 = Base64.encode64(file)

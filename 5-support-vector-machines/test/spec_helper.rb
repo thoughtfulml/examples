@@ -1,7 +1,6 @@
 require 'minitest/autorun'
 require 'tempfile'
 require 'mocha/setup'
-require 'minitest/doc_reporter'
 
 Dir[File.expand_path('../../lib/**/*.rb', __FILE__)].each {|_| require _ }
 

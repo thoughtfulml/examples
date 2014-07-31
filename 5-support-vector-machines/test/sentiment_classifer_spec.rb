@@ -21,19 +21,6 @@ describe SentimentClassifier do
     Rational(misses, total)
   end
 
-  it 'builds using automagic defaults .neg and .pos' do
-    neg = write_training_file("This is very negative", ['negative', '.neg'])
-    pos = write_training_file("This is very positive", ['positive', '.pos'])
-    # SentimentClassifier.send(:include, ::MiniTest::Expectations)
-    neg_corp = Corpus.new(neg.path, :negative)
-    pos_corp = Corpus.new(pos.path, :positive)
-
-    Corpus.expects(:new).with(neg.path, :negative).returns(neg_corp)
-    Corpus.expects(:new).with(pos.path, :positive).returns(pos_corp)
-
-    classifier = SentimentClassifier.build([neg.path, pos.path])
-  end
-
   it 'cross validates with an error of 35% or less' do
     neg = split_file("./config/rt-polaritydata/rt-polarity.neg")
     pos = split_file("./config/rt-polaritydata/rt-polarity.pos")

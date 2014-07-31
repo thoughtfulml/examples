@@ -1,26 +1,19 @@
 require_relative './spec_helper'
 
 describe CorpusSet do
-  include TestMacros
+  let(:positive) { StringIO.new('I love this country') }
+  let(:negative) { StringIO.new('I hate this man') }
+
+  let(:positive_corp) { Corpus.new(positive, :positive) }
+  let(:negative_corp) { Corpus.new(negative, :negative) }
+
+  let(:corpus_set) { CorpusSet.new([positive_corp, negative_corp]) }
 
   it 'composes two corpuses together' do
-    positive = write_training_file('I love this country', 'positive')
-    negative = write_training_file('I hate this man', 'negative')
-    positive_corp = Corpus.new(positive.path, :positive)
-    negative_corp = Corpus.new(negative.path, :negative)
-
-    corpus_set = CorpusSet.new([positive_corp, negative_corp])
     corpus_set.words.must_equal %w[love country hate man]
   end
 
   it 'returns a set of sparse vectors to train on' do
-    positive = write_training_file('I love this country', 'positive')
-    negative = write_training_file('I hate this man', 'negative')
-    positive_corp = Corpus.new(positive.path, :positive)
-    negative_corp = Corpus.new(negative.path, :negative)
-
-    corpus_set = CorpusSet.new([positive_corp, negative_corp])
-
     expected_ys = [1, -1]
     expected_xes = [[0,1], [2,3]]
     expected_xes.map! do |x|

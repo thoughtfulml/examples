@@ -25,8 +25,9 @@ class Neighborhood
   def self.face_class(filename, subkeys)
     dir = File.dirname(filename)
     base = File.basename(filename, '.png')
-    
-    json = JSON.parse(File.read(File.join(dir, "attributes.json")))
+   
+    attributes_path = File.expand_path('../attributes.json', filepath) 
+    json = JSON.parse(File.read(attributes_path)))
     
     h = nil
 

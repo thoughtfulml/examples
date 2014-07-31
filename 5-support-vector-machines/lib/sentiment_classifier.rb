@@ -21,7 +21,7 @@ class SentimentClassifier
         '.pos' => :positive,
         '.neg' => :negative
       }
-      Corpus.new(file, mapping.fetch(File.extname(file)))
+      Corpus.new(File.open(file, 'rb'), mapping.fetch(File.extname(file)))
     end))
   end
 
