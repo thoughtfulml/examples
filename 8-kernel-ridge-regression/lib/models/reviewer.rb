@@ -41,10 +41,13 @@ class Reviewer < Sequel::Model
 
     xtx = (x.transpose * x).to_f
 
-    until (left = xtx + shrinkage * IDENTITY).regular?
+    left = xtx + shrinkage * IDENTITY
+
+    until MatrixDeterminance.new(left).regular?
       puts "Shrinking iteration #{iteration}"
       shrinkage = (2 ** iteration) * 10e-6
       iteration += 1
+      left = xtx + shrinkage * IDENTITY
     end
 
     (left * x.transpose * NMatrix[overall].transpose).to_a.flatten
