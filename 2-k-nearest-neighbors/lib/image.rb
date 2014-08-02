@@ -7,7 +7,6 @@ class Image
 
   def initialize(filepath)
     @filepath = filepath
-    @face_found = false
   end
 
   def self.write(filepath)

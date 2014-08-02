@@ -1,7 +1,5 @@
 require 'json'
 class Neighborhood
-  K = 4
-
   def initialize(files)
     @ids = {}
     @files = files
@@ -43,7 +41,7 @@ class Neighborhood
     h.select {|k,v| subkeys.include?(k) }
   end
 
-  def attributes_guess(file, k = K)
+  def attributes_guess(file, k = 4)
     ids = nearest_feature_ids(file, k)
 
     votes = {
