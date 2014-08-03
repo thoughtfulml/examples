@@ -3,7 +3,7 @@ require_relative './spec_helper'
 describe Corpus do
   let(:negative) { StringIO.new('I hated that so much') }
   let(:negative_corpus) { Corpus.new(negative, :negative) }
-  let(:positive) { StringIO.new('I loved that movie so much!! I loved it') }
+  let(:positive) { StringIO.new('loved movie!! loved') }
   let(:positive_corpus) { Corpus.new(positive, :positive) }
 
   it 'consumes multiple files and turns it into sparse vectors' do

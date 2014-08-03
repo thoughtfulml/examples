@@ -3,9 +3,8 @@ require 'set'
 require File.expand_path('../tokenizer.rb', __FILE__)
 class Language
   attr_reader :name, :characters, :vectors
-  def initialize(text_file, name)
+  def initialize(language_io, name)
     @name = name
-    @text_file = text_file
-    @vectors, @characters = Tokenizer.tokenize(File.open(@text_file, 'r'))
+    @vectors, @characters = Tokenizer.tokenize(language_io)
   end
 end

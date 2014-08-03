@@ -1,6 +1,4 @@
 class SentimentClassifier
-  NotTrainedError = Class.new(StandardError)
-
   def initialize(corpus_set)
     @corpus_set = corpus_set
     @c = 2 ** 7

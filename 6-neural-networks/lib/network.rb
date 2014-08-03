@@ -12,6 +12,7 @@ class Network
     build_trainer!
     build_standard_fann!
     @fann.train_on_data(@trainer, 1000, 10, @error)
+    self
   end
 
   def code(vector)
