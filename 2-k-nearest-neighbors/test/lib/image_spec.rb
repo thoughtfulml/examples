@@ -20,4 +20,16 @@ describe Image do
     actual_md5 = Digest::MD5.hexdigest(File.read(@image.filepath))
     expected_md5.must_equal actual_md5
   end
+
+  it 'converts a file loaded from base64' do
+    file = File.read("./test/fixtures/raw.jpg")
+    base64 = Base64.encode64(file)
+    @image = Image.from_base64(base64)
+    @face = @image.to_face
+
+    avatar1 = Phashion::Image.new("./test/fixtures/avatar.jpg")
+    avatar2 = Phashion::Image.new(@face.filepath)
+
+    assert avatar1.duplicate?(avatar2)
+  end
 end
