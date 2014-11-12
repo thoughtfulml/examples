@@ -9,7 +9,7 @@ GEM
       rb-kqueue (>= 0.2)
     mini_magick (3.7.0)
       subexec (~> 0.2.1)
-    phashion (1.0.6)
+    phashion (1.1.1)
     puma (2.2.2)
       rack (>= 1.1, < 2.0)
     rack (1.5.2)
