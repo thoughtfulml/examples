@@ -24,7 +24,7 @@ class Neighborhood
     dir = File.dirname(filename)
     base = File.basename(filename, '.png')
 
-    attributes_path = File.expand_path('../attributes.json', filepath)
+    attributes_path = File.expand_path('attributes.json', dir)
     json = JSON.parse(File.read(attributes_path))
 
     h = nil

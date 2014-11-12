@@ -58,7 +58,7 @@ class Image
 
   def crop_params
     crop_params = <<-EOL
-      #{x_size - 1}x#{y_size-1}+#{top_left.x + 1}+#{top_left.y + 1}
+      #{x_size - 1}x#{y_size-1}+#{face_region.top_left.x + 1}+#{face_region.top_left.y + 1}
     EOL
   end
 end
