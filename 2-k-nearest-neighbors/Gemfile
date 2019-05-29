@@ -6,12 +6,8 @@ gem 'mini_magick'
 gem 'ruby-opencv', :require => 'opencv'
 gem 'algorithms'
 gem 'rake'
-
+gem 'minitest'
 
 group :development do
   gem 'rerun'
-end
-
-group :test do
-  gem 'phashion'
 end
