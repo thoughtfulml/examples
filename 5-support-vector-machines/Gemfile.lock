@@ -9,7 +9,7 @@ GEM
       minitest (~> 5.0)
     mocha (0.14.0)
       metaclass (~> 0.0.1)
-    rack (1.6.11)
+    rack (1.6.12)
     rack-protection (1.5.5)
       rack
     rake (10.3.2)
