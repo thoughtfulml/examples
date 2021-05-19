@@ -3,7 +3,7 @@ GEM
   specs:
     narray (0.6.0.9)
     pg (0.17.1)
-    rake (10.3.2)
+    rake (12.3.3)
     sequel (4.12.0)
 
 PLATFORMS
