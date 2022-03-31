@@ -10,7 +10,7 @@ GEM
     mini_magick (4.9.4)
     minitest (5.13.0)
     nio4r (2.5.8)
-    puma (4.3.11)
+    puma (4.3.12)
       nio4r (~> 2.0)
     rack (1.6.12)
     rack-protection (1.5.5)
